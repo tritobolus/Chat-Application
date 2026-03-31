@@ -34,7 +34,7 @@ export const SignUp = () => {
       setOTPLoading(false);
 
       console.log(res);
-      alert("OTP snt to your email id");
+      alert("OTP sent to your email id");
       setOTP(res.data.OTP);
     } catch (error) {
       console.log(error.response.data.message);

@@ -11,8 +11,7 @@ import { socket } from "../socket/socket";
 export const Layout = () => {
   const [loading, setLoading] = useState(false);
 
-  const { checkAuth, auth, getUsers, username, email, setOnlineUsers, userId } =
-    useCC();
+  const { checkAuth, auth, getUsers, setOnlineUsers, onlineUsers, loginUser } = useCC();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,11 +30,20 @@ export const Layout = () => {
     init();
   }, []);
 
-  socket.emit("user-online", userId);
+  useEffect(() => {
+    if (loginUser?.activestatus == true) {
+      socket.emit("user-online", loginUser._id);
+    }
+    if(loginUser?.activestatus == false) {
+      socket.emit("user-offline", loginUser._id);
+    }
+  }, [loginUser?.activestatus]);
 
-  socket.on("online-users", (users) => {
-    setOnlineUsers(users);
-  });
+  useEffect(() => {
+    socket.on("online-users", (users) => {
+      setOnlineUsers(users);
+    });
+  }, []);
 
   return (
     <>

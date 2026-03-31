@@ -5,15 +5,20 @@ import { io } from "socket.io-client";
 export const Context = createContext();
 
 export const ContextProvider = ({ children }) => {
+  //my details
   const [auth, setAuth] = useState(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
 
+  // other details
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState("");
+  const [currentRightWindow, setCurrentRightWindow] = useState("");
+  const [currentRightWindowType, setCurrentRightWindowType] = useState("");
 
   const [users, setUseres] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [loginUser, setLoginUser] = useState(null);
 
   //for dropdown
   const [newGroup, setNewGroup] = useState(false);
@@ -25,7 +30,7 @@ export const ContextProvider = ({ children }) => {
       setNewGroup(false);
       // setDropDown(false)
     } else {
-      setDropDown(false)
+      setDropDown(false);
       setNewGroup(true);
     }
   };
@@ -37,6 +42,7 @@ export const ContextProvider = ({ children }) => {
       setDropDown(true);
     }
   };
+  // http://localhost:8000
 
   const checkAuth = async () => {
     try {
@@ -64,8 +70,9 @@ export const ContextProvider = ({ children }) => {
   const getUsers = async () => {
     try {
       const res = await axios.get("http://localhost:8000/user/getuser");
-      console.log(res);
+      // console.log(res);
       setUseres(res.data.users.filter((user) => user._id !== userId));
+      setLoginUser(res.data.users.find((u) => u._id == userId));
     } catch (error) {
       console.log(error);
     }
@@ -76,6 +83,19 @@ export const ContextProvider = ({ children }) => {
     }
   }, [userId]);
 
+  const getGroups = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/group/getGroups");
+      // console.log(res.data.groupdata);
+      setGroups(res.data.groupdata);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getGroups();
+  }, []);
+
   return (
     <Context.Provider
       value={{
@@ -85,17 +105,22 @@ export const ContextProvider = ({ children }) => {
         username,
         checkAuth,
         getUsers,
+        getGroups,
         users,
         setOnlineUsers,
         onlineUsers,
-        setCurrentUser,
-        currentUser,
+        setCurrentRightWindow,
+        currentRightWindow,
+        setCurrentRightWindowType,
+        currentRightWindowType,
         handleNewGroup,
         handleDropdown,
         setDropDown,
         dropDown,
         setNewGroup,
-        newGroup
+        newGroup,
+        loginUser,
+        groups,
       }}
     >
       {children}

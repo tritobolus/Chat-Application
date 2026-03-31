@@ -10,15 +10,32 @@ const socketHandler = (io) => {
       console.log("User joined room:", userId);
     });
 
+    //join groups using group id
+    socket.on("joinGroup", (groupId) => {
+      socket.join(groupId);
+    });
+
     // sending message
     socket.on("sendMessage", (data) => {
-      const { receiverId } = data;
-      io.to(receiverId).emit("receiveMessage", data);
+      const { receiverId, messageType, groupId } = data;
+      if (messageType == "privateMessage") {
+        io.to(receiverId).emit("receiveMessage", data);
+      }
+      if (messageType == "groupMessage") {
+        io.to(groupId).emit("receiveMessage", data);
+      }
+      // io.to(receiverId).emit("receiveMessage", data);
     });
 
     //update online useres when they entered the chat app
     socket.on("user-online", (userId) => {
       onlineUsers.set(userId, socket.id);
+
+      io.emit("online-users", Array.from(onlineUsers.keys()));
+    });
+    //when user offine update it
+    socket.on("user-offline", (userId) => {
+      onlineUsers.delete(userId);
 
       io.emit("online-users", Array.from(onlineUsers.keys()));
     });

@@ -9,6 +9,9 @@ import connectDB from "./config/db.js";
 import getUser from "./routes/userRoutes/userRoute.js";
 import authRoutes from "./routes/authRoutes/authRoute.js";
 import messageRoutes from "./routes/messageRoutes/messageRoute.js";
+import groupRoutes from "./routes/groupRoutes/groupRoute.js"
+import settings from "./routes/settingsRoute.js"
+
 import socketHandler from "./socket/socket.js";
 
 import dotenv from "dotenv";
@@ -25,7 +28,7 @@ connectDB();
 //soket connetion with cors configuration
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://average-prairie-milwaukee-lives.trycloudflare.com"],
     credentials: true,
   },
 });
@@ -35,7 +38,7 @@ socketHandler(io);
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://average-prairie-milwaukee-lives.trycloudflare.com"],
     credentials: true,
   }),
 );
@@ -43,5 +46,7 @@ app.use(
 app.use("/authentication", authRoutes);
 app.use("/message", messageRoutes);
 app.use("/user", getUser);
+app.use("/settings", settings)
+app.use("/group", groupRoutes);
 
 server.listen(8000, () => console.log("Server is runing..."));

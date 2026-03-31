@@ -8,9 +8,15 @@ const messageSchema = new mongoose.Schema(
         },
         receiverId: {
             type: String,
-            required: true,
+        },
+        groupId: {
+            type: String,
         },
         message: {
+            type: String,
+            required: true
+        },
+        messageType: {
             type: String,
             required: true
         }

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useCC } from "../../context/Context";
 import { IoMdSearch } from "react-icons/io";
+import axios from "axios";
 
 export const NewGroup = () => {
   const [groupName, setGroupName] = useState();
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const { users,userId, handleNewGroup } = useCC();
+  const { users, userId, handleNewGroup, getGroups } = useCC();
 
   const handleSelectUser = (userId) => {
     setSelectedUsers((prev) => {
@@ -17,14 +18,24 @@ export const NewGroup = () => {
     });
   };
 
-  const handleCreateGroup = () => {
-    const groupData = {
+  const handleCreateGroup = async() => {
+    try {
+      const groupData = {
         groupName,
         adminId: userId,
-        members:selectedUsers
+        members: selectedUsers,
+      };
+      const res = await axios.post("http://localhost:8000/group/create", groupData);
+
+
+      console.log(res)
+      getGroups(); //what is the problem with this?  sying it's not a function 
+      handleNewGroup()
+
+    } catch (error) {
+      console.log(error);
     }
-    console.log(groupData)
-  }
+  };
 
   return (
     <>
@@ -89,7 +100,10 @@ export const NewGroup = () => {
           >
             Cancel
           </button>
-          <button onClick={() => handleCreateGroup()} className="bg-violet-700 text-white hover:cursor-pointer rounded-xl px-8 py-3">
+          <button
+            onClick={() => handleCreateGroup()}
+            className="bg-violet-700 text-white hover:cursor-pointer rounded-xl px-8 py-3 hover:bg-violet-500 active:scale-95 transition-all duration-200"
+          >
             Create
           </button>
         </div>

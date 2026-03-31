@@ -1,64 +1,143 @@
-
-
-import React from "react";
 import { useCC } from "../context/Context";
-import { useEffect, useState, useRef } from "react"
-;
+import { useEffect, useState, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { ImAttachment } from "react-icons/im";
 import { BsEmojiSmile } from "react-icons/bs";
 import axios from "axios";
 
 import { socket } from "../socket/socket";
+import { Profile } from "./UI/Profile";
+import { GroupProfile} from './UI/GroupProfile'
+import { Loading } from "./UI/Loading";
 
 export const Rightside = () => {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [messageLoading, setMessageLoading] = useState(false);
+
+  const [profile, setProfile] = useState(false);
 
   const chatRef = useRef(null);
 
-  const { users, userId, onlineUsers, currentUser } = useCC();
+  const {
+    users,
+    groups,
+    userId,
+    onlineUsers,
+    currentRightWindow,
+    currentRightWindowType,
+    loginUser,
+    username,
+  } = useCC();
 
-  // get selected user
-  useEffect(() => {
-    const selectedUser = users.find((user) => user._id == currentUser);
-    setUser(selectedUser);
-  }, [currentUser, users]);
+  // useEffect(() => {
+  //   console.log("Selected:", currentRightWindow, currentRightWindowType);
+  // }, [currentRightWindow, currentRightWindowType]);
 
-  // send message
-  const sendMessage = async () => {
-    try {
-      const res = await axios.post("http://localhost:8000/message/send", {
-        senderId: userId,
-        receiverId: user._id,
-        message: message,
-      });
-
-      socket.emit("sendMessage", res.data.responce);
-
-      setMessages((prev) => [...prev, res.data.responce]);
-    } catch (error) {
-      console.log(error);
+  const handleProfile = () => {
+    if (profile) {
+      setProfile(false);
+    } else {
+      setProfile(true);
     }
   };
 
-  // get messages
-  const getMessages = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:8000/message/getmessages",
-        {
-          params: {
-            userA: userId,
-            userB: user._id,
-          },
-        }
-      );
+  // get selected user
+  useEffect(() => {
+    if (currentRightWindowType == "private") {
+      const selectedUser = users.find((user) => user._id == currentRightWindow);
+      setUser(selectedUser);
+    }
 
-      setMessages(res.data.messages);
-    } catch (error) {
-      console.log(error);
+    if (currentRightWindowType == "group") {
+      const selectedUser = groups.find(
+        (group) => group._id == currentRightWindow,
+      );
+      setUser(selectedUser);
+    }
+  }, [currentRightWindow, users, groups, currentRightWindowType]);
+
+  // send message
+  const sendMessage = async () => {
+    //send private messages
+    if (currentRightWindowType == "private") {
+      try {
+        const res = await axios.post(
+          "http://localhost:8000/message/sendPrivateMessage",
+          {
+            senderId: userId,
+            receiverId: user._id,
+            message: message,
+            messageType: "privateMessage",
+          },
+        );
+
+        socket.emit("sendMessage", res.data.responce);
+
+        setMessages((prev) => [...prev, res.data.responce]);
+      } catch (error) {
+        console.log(error);
+      }
+      //send group messages
+    } else if (currentRightWindowType == "group") {
+      try {
+        const res = await axios.post(
+          "http://localhost:8000/message/sendGroupMessage",
+          {
+            senderId: userId,
+            groupId: currentRightWindow,
+            message: message,
+            messageType: "groupMessage",
+          },
+        );
+
+        socket.emit("sendMessage", res.data.responce);
+
+        // setMessages((prev) => [...prev, res.data.responce]);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  const getMessages = async () => {
+    if (currentRightWindowType == "private") {
+      try {
+        if (!userId && !user._id) {
+          alert("both are required!");
+        }
+        setMessageLoading(true);
+        const res = await axios.get(
+          "http://localhost:8000/message/getmessages",
+          {
+            params: {
+              userA: userId,
+              userB: user._id,
+            },
+          },
+        );
+        setMessages(res.data.messages);
+        setMessageLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    } else if (currentRightWindowType == "group") {
+      try {
+        setMessageLoading(true);
+        const res = await axios.get(
+          "http://localhost:8000/message/getGroupMessages",
+          {
+            params: {
+              groupId: currentRightWindow,
+            },
+          },
+        );
+        setMessages(res.data.messages);
+        setMessageLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -69,21 +148,59 @@ export const Rightside = () => {
     }
   }, [userId]);
 
+  //join to all groups
+  useEffect(() => {
+    const myGroups = groups.filter(
+      (group) => group.adminId === userId || group.members.includes(userId),
+    );
+
+    if (myGroups.length > 0) {
+      myGroups.forEach((group) => {
+        socket.emit("joinGroup", group._id);
+      });
+    }
+  }, [groups]);
+
   // fetch messages when user changes
   useEffect(() => {
-    if (user) {
+    if (user && userId) {
+      // console.log(" Calling getMessages with:", userId, user._id);
       getMessages();
     }
-  }, [user]);
+  }, [user, userId]);
 
   // receive socket message
   useEffect(() => {
     socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, data]);
+      // when its group Id then it is not showing aany data,, but when its receiverId itsshowing data why ?
+      console.log("from receivedMessage: ", data); //when i send message but it is group then its showing that it's messageType is private nessage.. why ?
+      if (data.messageType === "privateMessage") {
+        if (
+          data.senderId === currentRightWindow &&
+          data.receiverId === userId
+        ) {
+          // only tokhon UI te show korbe
+          setMessages((prev) => [...prev, data]);
+        }
+      }
+
+      if (data.messageType === "groupMessage") {
+        const currentGroup = groups.find((group) => group._id === data.groupId);
+
+        if (!currentGroup) return;
+
+        if (
+          (currentGroup.adminId === userId ||
+            currentGroup.members.includes(userId)) &&
+          data.groupId == currentRightWindow
+        ) {
+          setMessages((prev) => [...prev, data]);
+        }
+      }
     });
 
     return () => socket.off("receiveMessage");
-  }, []);
+  }, [currentRightWindow]);
 
   // auto scroll
   useEffect(() => {
@@ -94,132 +211,207 @@ export const Rightside = () => {
 
   return (
     <>
-      {user ? (
-        <div className="bg-violet-100 flex flex-col justify-between h-screen">
-          
-          {/* HEADER */}
-          <div className="flex justify-between bg-white border-b-2 border-gray-200 shadow-xl p-2">
-            <div className="flex items-center gap-x-2">
-              <img
-                src="https://cdn.hswstatic.com/gif/play/0b7f4e9b-f59c-4024-9f06-b3dc12850ab7-1920-1080.jpg"
-                alt=""
-                className="h-12 w-12 object-cover rounded-full"
-              />
-              <div className="flex flex-col leading-tight">
-                <p className="font-bold">{user?.username}</p>
-                <p className="text-sm">
-                  {onlineUsers.includes(user._id) ?(<p className=" text-green-500">Online</p>)  : (<p className=" text-gray-700">Offline</p>)}
-                </p>
+      <div className="relative h-screen">
+        {user ? (
+          <div className="bg-violet-100 flex flex-col justify-between h-screen">
+            {/* HEADER */}
+            <div
+              className={`flex justify-between ${loginUser.darkmode ? "bg-black border-gray-900" : "bg-white border-gray-200"} border-b-2  shadow-xl p-2 transition-all duration-500`}
+            >
+              <div
+                onClick={() => handleProfile()}
+                className="flex items-center gap-x-2 hover:cursor-pointer"
+              >
+                <img
+                  src="https://cdn.hswstatic.com/gif/play/0b7f4e9b-f59c-4024-9f06-b3dc12850ab7-1920-1080.jpg"
+                  alt=""
+                  className="h-12 w-12 object-cover rounded-full"
+                />
+                <div className="flex flex-col leading-tight">
+                  <p
+                    className={`${loginUser.darkmode ? "text-white" : "text-black"} font-bold transition-all duration-500`}
+                  >
+                    {currentRightWindowType == "private"
+                      ? user?.username
+                      : user?.groupName}
+                  </p>
+                  {currentRightWindowType == "private" ? (
+                    <p className="text-sm">
+                      {onlineUsers.includes(user._id) ? (
+                        <p className=" text-green-500">Online</p>
+                      ) : (
+                        <p className=" text-gray-500">Offline</p>
+                      )}
+                    </p>
+                  ) : (
+                    <div className={`text-sm flex gap-x-1 ${loginUser.darkmode ? "text-gray-200" : "text-black"}`}>
+                      {user?.members?.map((memberId) => {
+                        const member = users.find((u) => u._id === memberId);
+                        return <p key={memberId}>{member?.username},</p>;
+                      })}
+                      <p>{username}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* CHAT AREA */}
-          <div
-            ref={chatRef}
-            className="hide-scrollbar flex-1 overflow-y-auto px-4 py-4 space-y-1  bg-gray-100"
-          >
-            {messages.map((message, index) => {
-
-              // Detect previous and next messages
-              const prevMessage = messages[index - 1];
-              const nextMessage = messages[index + 1];
-
-              // Check if message belongs to current user
-              const isMyMessage = message.senderId === userId;
-
-              // Detect grouping
-              const isPrevSameSender =
-                prevMessage?.senderId === message.senderId;
-
-              const isNextSameSender =
-                nextMessage?.senderId === message.senderId;
-
-              // Determine bubble shape
-              let bubbleShape = "";
-
-              if (!isPrevSameSender && !isNextSameSender) {
-                bubbleShape = "rounded-xl mt-2";
-              } else if (!isPrevSameSender && isNextSameSender) {
-                bubbleShape = isMyMessage
-                  ? "rounded-t-xl rounded-bl-xl"
-                  : "rounded-t-xl rounded-br-xl";
-              } else if (isPrevSameSender && isNextSameSender) {
-                bubbleShape = isMyMessage
-                  ? "rounded-l-xl"
-                  : "rounded-r-xl";
-              } else if (isPrevSameSender && !isNextSameSender) {
-                bubbleShape = isMyMessage
-                  ? "rounded-b-xl rounded-l-xl"
-                  : "rounded-b-xl rounded-r-xl";
-              }
-
-              return (
-                <div
-                  key={message._id}
-                  className={`flex ${
-                    isMyMessage ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={` relative px-4 py-2 shadow text-sm max-w-xs
-                    ${isMyMessage ? "bg-violet-700 text-white mr-2" : "bg-white ml-2"}
-                    ${bubbleShape}`}
-                  >
-                    {message.message}
-                     {/* message sender indicator */}
-                    <div className={`absolute top-0  rounded-bl-4xl h-4 w-5 
-                       ${message.senderId === userId ? 
-                        `bg-violet-700 rounded-l-xl mr-2
-                            ${messages[index-1] && messages[index-1].senderId === userId ? 
-                              "hidden" : 
-                              "rounded-br-full -right-4" }`   : 
-                        `bg-white rounded-r-xl ml-2
-                            ${messages[index-1] && messages[index-1].receiverId === userId ?
-                              "hidden" :
-                              "rounded-bl-full -left-4" }
-                        `} 
-                    `}></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* MESSAGE INPUT */}
-          <div className="  flex gap-x-4 justify-center items-center bg-white px-4 py-3 ">
-            <ImAttachment size={20} className="text-gray-500"/>
-
-           <div className="relative w-full">
-             <input
-              type="text"
-              value={message}
-              placeholder="Type a message..."
-              onChange={(e) => setMessage(e.target.value)}
-              className="rounded-full w-full  px-6 py-2 bg-gray-100"
-              
-            />
-
-            <BsEmojiSmile size={20} className="absolute right-3 top-[11px] text-gray-500"/>
-           </div>
-
-            <button
-              disabled={!message}
-              onClick={() => {
-                sendMessage();
-                setMessage("");
-              }}
-              className={`  p-3 rounded-full bg-violet-700 ${!message && "opacity-50 hover:cursor-not-allowed"}`}
+            {/* CHAT AREA */}
+            <div
+              ref={chatRef}
+              className={`hide-scrollbar flex-1 overflow-y-auto px-4 py-4 space-y-1 ${loginUser.darkmode ? "bg-gray-900/99" : "bg-gray-100"} bg-black transition-all duration-500`}
             >
-              <IoSend size={17} className="text-xl text-white" />
-            </button>
+              {messages.length == 0 ? (
+                <p>You haven't started conversation yet</p>
+              ) : (
+                messages.map((message, index) => {
+                  // Detect previous and next messages
+                  const prevMessage = messages[index - 1];
+                  const nextMessage = messages[index + 1];
+
+                  // Check if message belongs to current user
+                  const isMyMessage = message.senderId === userId;
+
+                  // Detect grouping
+                  const isPrevSameSender =
+                    prevMessage?.senderId === message.senderId;
+
+                  const isNextSameSender =
+                    nextMessage?.senderId === message.senderId;
+
+                  // Determine bubble shape
+                  let bubbleShape = "";
+
+                  if (!isPrevSameSender && !isNextSameSender) {
+                    bubbleShape = "rounded-xl mt-2";
+                  } else if (!isPrevSameSender && isNextSameSender) {
+                    bubbleShape = isMyMessage
+                      ? "rounded-t-xl rounded-bl-xl rounded-b"
+                      : "rounded-t-xl rounded-br-xl rounded-b";
+                  } else if (isPrevSameSender && isNextSameSender) {
+                    bubbleShape = isMyMessage
+                      ? "rounded-l-xl rounded-t rounded-br"
+                      : "rounded-r-xl rounded-t rounded-bl";
+                  } else if (isPrevSameSender && !isNextSameSender) {
+                    bubbleShape = isMyMessage
+                      ? "rounded-b-xl rounded-l-xl rounded-t"
+                      : "rounded-b-xl rounded-r-xl rounded-t";
+                  }
+
+                  return (
+                    <div
+                      key={message._id}
+                      className={`flex ${
+                        isMyMessage ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={` relative px-4 py-2 shadow text-sm max-w-xs 
+                    ${isMyMessage ? "bg-violet-700 text-white mr-2 pb-2 pr-15" : "bg-white ml-2 pr-15 pb-2 "}
+                    ${bubbleShape} ${(prevMessage?.senderId !== message.senderId) ? "mt-2" : ""}`}
+                      >
+                        {(message.senderId !== userId) && (prevMessage?.senderId !== message.senderId) && (
+                          <p className="font-semibold">
+                            {
+                              users.find((user) => user._id == message.senderId)
+                                .username
+                            }
+                          </p>
+                        )}
+
+                        <p>{message.message}</p>
+                        {/* message sender indicator */}
+                        <div
+                          className={`absolute top-0 rounded-t-md h-3 w-5 
+                       ${
+                         message.senderId === userId
+                           ? `bg-violet-700 rounded-l-xl mr-2
+                            ${
+                              messages[index - 1] &&
+                              messages[index - 1].senderId === userId
+                                ? "hidden"
+                                : "-right-4 rounded-br-3xl"
+                            }`
+                           : `bg-white rounded-r-xl ml-2
+                            ${
+                              messages[index - 1] &&
+                              messages[index - 1].senderId == message.senderId
+                                ? "hidden"
+                                : "-left-4  rounded-bl-3xl"
+                            }
+                        `
+                       } 
+                    `}
+                        ></div>
+                        {/* message time */}
+                        <div className="absolute bottom-1 right-2">
+                          <p
+                            className={` text-[9px]  ${isMyMessage ? "text-gray-300" : "text-gray-600 "}`}
+                          >
+                            {new Date(message.createdAt).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* MESSAGE INPUT */}
+            <div
+              className={` flex gap-x-4 justify-center items-center ${loginUser.darkmode ? "bg-black" : "bg-white"}  px-4 py-3 transition-all duration-500`}
+            >
+              <ImAttachment size={20} className="text-gray-500" />
+
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={message}
+                  placeholder="Type a message..."
+                  onChange={(e) => setMessage(e.target.value)}
+                  className={`rounded-full w-full  px-6 py-2 ${loginUser.darkmode ? "bg-gray-700 text-white" : "bg-gray-100 text-black"} transition-all duration-500 focus:outline-none`}
+                />
+
+                <BsEmojiSmile
+                  size={20}
+                  className="absolute right-3 top-[11px] text-gray-500"
+                />
+              </div>
+
+              <button
+                disabled={message.trim().length < 1}
+                onClick={() => {
+                  sendMessage();
+                  setMessage("");
+                }}
+                className={`  p-3 rounded-full bg-violet-700 ${message.trim().length < 1 && "opacity-50 hover:cursor-not-allowed"}`}
+              >
+                <IoSend size={17} className="text-xl text-white" />
+              </button>
+            </div>
           </div>
+        ) : (
+          <div>
+            <p>No one selected yet</p>
+          </div>
+        )}
+
+        {/* profiles */}
+        <div className="absolute top-0 right-0">
+          {profile && currentRightWindowType == "private" && <Profile setProfile={setProfile} user={user} />}
+          {profile && currentRightWindowType == "group" && <GroupProfile setProfile={setProfile} user={user} />}
         </div>
-      ) : (
-        <div>
-          <p>No one selected yet</p>
-        </div>
-      )}
+        {/* <div className="absolute top-10 right-10 w-10 h-10 backdrop-blur-3xl">
+        {messageLoading && <Loading/> }
+      </div> */}
+      </div>
     </>
   );
 };
