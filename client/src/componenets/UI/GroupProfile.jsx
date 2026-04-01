@@ -1,20 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCC } from "../../context/Context";
 
 import { IoMdClose } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
 import { MdBlock } from "react-icons/md";
-import { RiDeleteBin6Line } from "react-icons/ri";
+
+import { CgProfile } from "react-icons/cg";
+import { IoSettingsSharp } from "react-icons/io5";
+
+import { GroupInfo } from "./GroupProfile UI/GroupInfo";
+import { GroupSettings } from "./GroupProfile UI/GroupSettings";
 
 export const GroupProfile = ({ setProfile, user }) => {
   const { onlineUsers, userId, users, loginUser } = useCC();
   const admin = users.find((u) => u._id === user.adminId);
+
+  const [tab, setTab] = useState("info");
+
   return (
     <div
       className={`flex flex-col gap-y-3 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 shadow-2xl p-4 py-6 transition-all duration-500`}
     >
       <div className="flex justify-between items-center">
-        <p className="font-bold text-lg">Group Info</p>
+        <p className="font-bold text-lg">Group {tab == "info" ? "Info" : "Settings"}</p>
 
         <IoMdClose onClick={() => setProfile(false)} size={20} />
       </div>
@@ -30,82 +38,22 @@ export const GroupProfile = ({ setProfile, user }) => {
         <p className="text-2xl font-semibold">{user.groupName}</p>
       </div>
 
-      {/* BIO */}
-      <div className="flex flex-col gap-y-1">
-        <p className="text-violet-700 text-md font-semibold">Description: </p>
-        <p>{user.bio}</p>
+      <div className="flex-1">
+        {tab == "info" && <GroupInfo user={user} />}
+        {tab == "settings" && <GroupSettings user={user} admin={admin} />}
       </div>
 
-      {/* admins */}
-      <div className="flex flex-col gap-y-1">
-        <p className="text-violet-700 text-md font-semibold">Admin: </p>
-        {loginUser._id == user.adminId ? (
-          <div className="flex gap-x-3 p-2">
-            <img
-              src={loginUser.profileImage}
-              alt=""
-              className="h-10 w-10 object-cover rounded-full"
-            />
-            <div className="flex flex-col justify-center">
-              <p className="text-md font-semibold">{loginUser.username}</p>
-              <p className="text-sm">{loginUser.bio}</p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div className="flex gap-x-3 p-1">
-              <img
-                src={admin?.profileImage}
-                alt=""
-                className="h-10 w-10 object-cover rounded-full"
-              />
-              <div className="flex flex-col justify-center">
-                <p className="text-md font-semibold">{admin?.username}</p>
-                <p className="text-sm">{admin?.bio}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* members */}
-      <div className="flex flex-col gap-y-1">
-        <p className="text-violet-700 text-md font-semibold">Members: </p>
-        <div className="flex flex-col gap-y-1 p-1">
-          {user.members.map((member) => {
-            const memberUser = users.find((u) => u._id === member);
-
-            return (
-              <div key={member} className="flex gap-x-3 ">
-                <img
-                  src={memberUser?.profileImage}
-                  alt=""
-                  className="h-10 w-10 object-cover rounded-full"
-                />
-                <div className="flex flex-col justify-center">
-                  <p className="text-md font-semibold">
-                    {memberUser?.username}
-                  </p>
-                  <p className="text-sm">{memberUser?.bio}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* others*/}
-      <div className="flex flex-col gap-y-1">
-        {/* <div className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}>
-                <MdBlock size={20} className="text-red-500" />
-                <p className="text-red-500">Block User</p>
-              </div> */}
-        <div
-          className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}
-        >
-          <RiDeleteBin6Line size={20} className="text-red-500" />
-          <p className="text-red-500">Delete Conversation</p>
-        </div>
+      <div className="flex justify-between px-15">
+        <CgProfile
+          onClick={() => setTab("info")}
+          size={25}
+          className={`${tab == "info" ? "text-purple-600" : "text-black"}`}
+        />
+        <IoSettingsSharp
+          onClick={() => setTab("settings")}
+          size={25}
+          className={`${tab == "settings" ? "text-purple-600" : "text-black"}`}
+        />
       </div>
     </div>
   );

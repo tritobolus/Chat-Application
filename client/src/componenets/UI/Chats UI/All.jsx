@@ -19,7 +19,7 @@ export const All = ({ tabData, tab }) => {
             >
               <div className="relative flex flex-col leading-tight">
                 <img
-                  src="https://cdn.hswstatic.com/gif/play/0b7f4e9b-f59c-4024-9f06-b3dc12850ab7-1920-1080.jpg"
+                  src={user.profileImage}
                   alt=""
                   className="h-12 w-12 object-cover rounded-full"
                 />

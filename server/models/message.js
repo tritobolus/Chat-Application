@@ -19,6 +19,10 @@ const messageSchema = new mongoose.Schema(
         messageType: {
             type: String,
             required: true
+        },
+        isMedia: {
+            type: Boolean,
+            required:true
         }
     }, 
     {

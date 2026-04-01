@@ -1,66 +1,57 @@
-import React, { useEffect, useState } from "react";
-import { CiEdit } from "react-icons/ci";
-import { MdDone } from "react-icons/md";
-import { useCC } from "../../context/Context";
+import React, { useState, useEffect } from "react";
+import { useCC } from "../../../context/Context";
 import axios from "axios";
 
-export const Settings = () => {
-  const { loginUser, getUsers, userId } = useCC();
-  const [isUsername, setIsUsername] = useState(false);
+import { CiEdit } from "react-icons/ci";
+import { MdDone } from "react-icons/md";
+import { RiDeleteBin6Line } from "react-icons/ri";
+
+export const GroupSettings = ({ user }) => {
+  const { onlineUsers, userId, users, loginUser, getGroups } = useCC();
+  const [isGroupName, setIsGroupName] = useState(false);
   const [isBio, setIsBio] = useState(false);
 
-  const [newUsername, setNewUsername] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
   const [newBio, setNewBio] = useState("");
 
-  const [toggle, setToggle] = useState(false);
-
-  const [changeProfile, setChangeProfile] = useState(false);
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    setNewUsername(loginUser.username);
-    setNewBio(loginUser.bio);
+    setNewGroupName(user.groupName);
+    setNewBio(user.bio);
   }, []);
 
-  const handleToggle = () => {
-    if (toggle) {
-      setToggle(false);
-    } else {
-      setToggle(true);
-    }
-  };
-
-  const handleUsername = async () => {
+  const handleGroupName = async () => {
     try {
       const res = await axios.patch(
-        "http://localhost:8000/settings/changeUsername",
+        "http://localhost:8000/settings/changeGroupName",
         {
-          userId: loginUser._id,
-          newUsername: newUsername,
+          groupId: user._id,
+          newGroupName: newGroupName,
         },
       );
 
       console.log(res);
-      getUsers();
-      setIsUsername(false);
+      getGroups();
+      setIsGroupName(false);
     } catch (error) {
       console.log(error);
     }
-    setIsUsername(false);
+    setIsGroupName(false);
   };
 
   const handleBio = async () => {
     try {
       const res = await axios.patch(
-        "http://localhost:8000/settings/changeBio",
+        "http://localhost:8000/settings/changeGroupBio",
         {
-          userId: loginUser._id,
+          groupId: user._id,
           newBio: newBio,
         },
       );
 
       console.log(res);
-      getUsers();
+      getGroups();
       setIsBio(false);
     } catch (error) {
       console.log(error);
@@ -68,41 +59,7 @@ export const Settings = () => {
     setIsBio(false);
   };
 
-  const handleActiveStatus = async () => {
-    try {
-      const res = await axios.patch(
-        "http://localhost:8000/settings/changeActiveStatus",
-        {
-          userId: loginUser._id,
-          currentStatus: loginUser?.activestatus,
-        },
-      );
-
-      console.log(res);
-      getUsers();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleDarkMode = async () => {
-    try {
-      const res = await axios.patch(
-        "http://localhost:8000/settings/changeDarkMode",
-        {
-          userId: loginUser._id,
-          currentDarkMode: loginUser?.darkmode,
-        },
-      );
-
-      console.log(res);
-      getUsers();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleProfileImage = async () => {
+  const handleGroupProfileImage = async () => {
     try {
       if (!image) {
         alert("Please select a image");
@@ -124,45 +81,44 @@ export const Settings = () => {
       const imageUrl = data.data.secure_url;
 
       //upload the image in custome avatar schema
-      await axios.patch(`http://localhost:8000/settings/changeProfileImage/`, {
+      await axios.patch(`http://localhost:8000/settings/changeGroupProfileImage/`, {
         imageUrl,
-        userId,
+        groupId: user._id ,
       });
 
-      getUsers();
+      getGroups();
       setImage(false);
     } catch (error) {
       console.log(error);
     }
   };
-
   return (
     <>
-      <div className="flex flex-col gap-y-5">
-        {/* personal details edit */}
+      <div className="flex flex-col gap-y-3">
+        {/* group details edit */}
         <div className="flex flex-col gap-y-3 ">
-          <p className="text-lg font-bold">Edit your details</p>
+          <p className="text-lg font-bold">Edit group details</p>
           <div className="flex flex-col gap-y-2 p-2 rounded-2xl bg-gray-100">
             {/* username */}
             <div className="flex flex-col gap-y-1">
-              <p className="font-semibold">username: </p>
+              <p className="font-semibold">groupname: </p>
               <div className="flex justify-between items-center gap-x-2">
                 <input
-                  disabled={!isUsername}
+                  disabled={!isGroupName}
                   type="text"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  className={`px-2 py-1 border rounded-xl w-full ${isUsername ? "border-gray-500" : "border-gray-300"}`}
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  className={`px-2 py-1 border rounded-xl w-full ${isGroupName ? "border-gray-500" : "border-gray-300"}`}
                 />
-                {isUsername ? (
+                {isGroupName ? (
                   <MdDone
-                    onClick={() => handleUsername()}
+                    onClick={() => handleGroupName()}
                     size={25}
                     className="text-purple-700     hover:cursor-pointer"
                   />
                 ) : (
                   <CiEdit
-                    onClick={() => setIsUsername(true)}
+                    onClick={() => setIsGroupName(true)}
                     size={25}
                     className="text-purple-700 hover:cursor-pointer"
                   />
@@ -170,7 +126,7 @@ export const Settings = () => {
               </div>
             </div>
             <div className="flex flex-col gap-y-1">
-              <p className="font-semibold">bio: </p>
+              <p className="font-semibold">description: </p>
               <div className="flex justify-between items-center gap-x-2">
                 <input
                   disabled={!isBio}
@@ -219,7 +175,7 @@ export const Settings = () => {
                 className="h-12 w-12 object-cover rounded-full"
               />
               <button
-                onClick={() => handleProfileImage()}
+                onClick={() => handleGroupProfileImage()}
                 className="px-3 py-1 bg-purple-500 rounded-xl text-white"
               >
                 Save
@@ -234,47 +190,17 @@ export const Settings = () => {
           )}
         </div>
 
-        {/* Dark Mode */}
-        <div className="flex justify-between">
-          <p>Dark mode</p>
-
-          {/* toggle button */}
+        {/* others*/}
+        <div className="flex flex-col gap-y-1">
+          {/* <div className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}>
+                <MdBlock size={20} className="text-red-500" />
+                <p className="text-red-500">Block User</p>
+              </div> */}
           <div
-            onClick={() => handleDarkMode()}
-            className={`p-1 h-5 w-9 ${!loginUser?.darkmode ? "bg-gray-300" : "bg-black"} rounded-2xl flex justify-between items-center transition-all duration-200`}
+            className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}
           >
-            <div>
-              <button
-                className={` ${loginUser?.darkmode && "hidden"} w-3 h-3 rounded-full bg-white`}
-              ></button>
-            </div>
-            <div>
-              <button
-                className={`${!loginUser?.darkmode && "hidden"} w-3 h-3 rounded-full bg-white `}
-              ></button>
-            </div>
-          </div>
-        </div>
-
-        {/* Active Status */}
-        <div className="flex justify-between">
-          <p>Active Status</p>
-
-          {/* toggle button */}
-          <div
-            onClick={() => handleActiveStatus()}
-            className={`p-1 h-5 w-9 ${!loginUser?.activestatus ? "bg-gray-300" : "bg-black"} rounded-2xl flex justify-between items-center transition-all duration-200`}
-          >
-            <div>
-              <button
-                className={` ${loginUser?.activestatus && "hidden"} w-3 h-3 rounded-full bg-white`}
-              ></button>
-            </div>
-            <div>
-              <button
-                className={`${!loginUser?.activestatus && "hidden"} w-3 h-3 rounded-full bg-white `}
-              ></button>
-            </div>
+            <RiDeleteBin6Line size={20} className="text-red-500" />
+            <p className="text-red-500">Delete Conversation</p>
           </div>
         </div>
       </div>

@@ -179,4 +179,19 @@ router.get("/verify", verifyUser, async (req, res) => {
   });
 });
 
+router.delete("/signout", async (req, res) => {
+  try {
+    // const isProduction = process.env.NODE_ENV === "production";
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false, //secure: isProduction,
+      sameSite: "lax", //sameSite: isProduction ? "none" : "lax",
+    });
+    return res.status(200).json({ message: "Successfully Sign Out" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ message: "Can't delete JWT token!" });
+  }
+});
+
 export default router;
