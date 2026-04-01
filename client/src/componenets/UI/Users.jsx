@@ -13,11 +13,12 @@ export const Users = () => {
     handleDropdown,
     dropDown,
     newGroup,
+    loginUser
   } = useCC();
   return (
     <div className="flex flex-col gap-y-3">
       {/* middle section */}
-      <div className="relative rounded-xl bg-gray-100  py-2">
+      <div className={`relative rounded-xl ${loginUser?.darkmode ? "bg-gray-900 text-white" : "bg-gray-100"}  py-2`}>
         <input
           type="text"
           placeholder="search users..."

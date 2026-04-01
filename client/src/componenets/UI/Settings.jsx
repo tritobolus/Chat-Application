@@ -140,9 +140,9 @@ export const Settings = () => {
     <>
       <div className="flex flex-col gap-y-5">
         {/* personal details edit */}
-        <div className="flex flex-col gap-y-3 ">
+        <div className={`flex flex-col gap-y-3 `}>
           <p className="text-lg font-bold">Edit your details</p>
-          <div className="flex flex-col gap-y-2 p-2 rounded-2xl bg-gray-100">
+          <div className={`flex flex-col gap-y-2 p-2 rounded-2xl ${loginUser?.darkmode ? "bg-black" : "bg-gray-100"} animation`}>
             {/* username */}
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold">username: </p>
@@ -241,7 +241,7 @@ export const Settings = () => {
           {/* toggle button */}
           <div
             onClick={() => handleDarkMode()}
-            className={`p-1 h-5 w-9 ${!loginUser?.darkmode ? "bg-gray-300" : "bg-black"} rounded-2xl flex justify-between items-center transition-all duration-200`}
+            className={`p-1 h-5 w-9 ${!loginUser?.darkmode ? "bg-gray-300" : "bg-purple-600"} rounded-2xl flex justify-between items-center transition-all duration-200`}
           >
             <div>
               <button
@@ -263,7 +263,7 @@ export const Settings = () => {
           {/* toggle button */}
           <div
             onClick={() => handleActiveStatus()}
-            className={`p-1 h-5 w-9 ${!loginUser?.activestatus ? "bg-gray-300" : "bg-black"} rounded-2xl flex justify-between items-center transition-all duration-200`}
+            className={`p-1 h-5 w-9 ${!loginUser?.activestatus ? loginUser.darkmode ? "bg-gray-800" : "bg-gray-300" : loginUser.darkmode ? "bg-purple-600" : "bg-black"} rounded-2xl flex justify-between items-center transition-all duration-200`}
           >
             <div>
               <button

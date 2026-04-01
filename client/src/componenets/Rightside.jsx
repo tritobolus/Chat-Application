@@ -41,6 +41,7 @@ export const Rightside = () => {
 
     useEffect(() => {
     setProfile(false)
+    setIsEmoji(false)
   }, [currentRightWindow])
 
   // useEffect(() => {
@@ -301,7 +302,7 @@ export const Rightside = () => {
                     </p>
                   ) : (
                     <div
-                      className={`text-sm flex gap-x-1 ${loginUser.darkmode ? "text-gray-200" : "text-black"}`}
+                      className={`text-sm flex gap-x-1 ${loginUser.darkmode ? "text-gray-200" : "text-black"} animation`}
                     >
                       {user?.members?.map((memberId) => {
                         const member = users.find((u) => u._id === memberId);
@@ -456,9 +457,9 @@ export const Rightside = () => {
                       className="h-10  "
                     />
                     <MdOutlineClose
-                      className="hover:cursor-pointer"
+                      className={`hover:cursor-pointer ${loginUser?.darkmode ? "text-white" : "text-black"} animation`}
                       size={25}
-                      onClick={() => setAttachment(false)}
+                      onClick={() => {setAttachment(false), setAttachment(false)}}
                     />
                     {isMediaLoding && <p className="text-red-500">wait image is sending...</p>}
                   </div>
@@ -476,7 +477,7 @@ export const Rightside = () => {
                   <BsEmojiSmile
                     onClick={() => setIsEmoji(!isEmoji)}
                     size={20}
-                    className={`absolute right-3 top-[11px]  hover:cursor-pointer ${isEmoji ? "text-purple-600" : "text-gray-500"}`}
+                    className={`absolute right-3 top-[11px]  hover:cursor-pointer ${isEmoji ? "text-purple-600 font-semibold" : "text-gray-500"}`}
                   />
                 )}
               </div>

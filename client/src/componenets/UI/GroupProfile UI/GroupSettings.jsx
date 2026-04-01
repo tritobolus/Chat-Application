@@ -98,7 +98,7 @@ export const GroupSettings = ({ user }) => {
         {/* group details edit */}
         <div className="flex flex-col gap-y-3 ">
           <p className="text-lg font-bold">Edit group details</p>
-          <div className="flex flex-col gap-y-2 p-2 rounded-2xl bg-gray-100">
+          <div className={`flex flex-col gap-y-2 p-2 rounded-2xl ${loginUser.darkmode ? "bg-black" : "bg-gray-100"} animation`}>
             {/* username */}
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold">groupname: </p>

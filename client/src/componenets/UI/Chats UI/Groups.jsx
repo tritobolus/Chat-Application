@@ -1,7 +1,7 @@
 import React from "react";
 import { useCC } from "../../../context/Context";
 export const Groups = ({ tabData, tab }) => {
-  const { setCurrentRightWindow, setCurrentRightWindowType, currentRightWindow, onlineUsers } = useCC();
+  const { setCurrentRightWindow, setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser } = useCC();
   //   console.log(tabData)
   return (
     <>
@@ -15,7 +15,7 @@ export const Groups = ({ tabData, tab }) => {
             <div
                 onClick={() => {setCurrentRightWindow(group._id), setCurrentRightWindowType("group")}}
               key={group._id}
-              className={`flex items-center gap-x-3 hover:bg-gray-100 p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
+              className={`flex items-center gap-x-3 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
             >
               <div className="flex flex-col leading-tight">
                 <img

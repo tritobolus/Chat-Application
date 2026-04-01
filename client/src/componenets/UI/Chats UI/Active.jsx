@@ -2,7 +2,7 @@ import React from "react";
 import { useCC } from "../../../context/Context";
 
 export const Active = ({ tabData, tab }) => {
-  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers } = useCC();
+  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser } = useCC();
   return (
     <>
       <div className="flex flex-col gap-y-1 overflow-y-auto hide-scrollbar flex-1">
@@ -15,7 +15,7 @@ export const Active = ({ tabData, tab }) => {
             <div
               onClick={() => {setCurrentRightWindow(user._id), setCurrentRightWindowType("private")}}
               key={user._id}
-              className={`flex items-center gap-x-3 hover:bg-gray-100 p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
+              className={`flex items-center gap-x-3 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
             >
               <div className="relative flex flex-col leading-tight">
                 <img
@@ -25,11 +25,11 @@ export const Active = ({ tabData, tab }) => {
                 />
                 <div className="absolute top-8 right-0 flex items-center gap-2">
                   <span
-                    className={`h-3 w-3 rounded-full ${
+                    className={`h-3 w-3 rounded-full border-2 ${
                       onlineUsers.includes(user._id)
-                        ? "bg-green-500 border-2 border-white"
-                        : "bg-gray-300 border-2 border-white"
-                    }`}
+                        ? "bg-green-500"
+                        : loginUser?.darkmode ? "bg-gray-500" : "bg-gray-300"
+                    } ${loginUser?.darkmode ? "border-black" : "border-white"} animation`}
                   ></span>
                 </div>
               </div>

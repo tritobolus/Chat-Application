@@ -16,6 +16,7 @@ export const Chats = () => {
     dropDown,
     newGroup,
     groups,
+    loginUser,
     userId,
   } = useCC();
 
@@ -38,7 +39,7 @@ export const Chats = () => {
     <>
       <div className="flex flex-col flex-1 gap-y-3 min-h-0 ">
         {/* search chat */}
-        <div className="relative rounded-xl bg-gray-100  py-2">
+        <div className={`relative rounded-xl ${loginUser?.darkmode ? "bg-gray-900 text-white" : "bg-gray-100"}  py-2`}>
           <input
             type="text"
             placeholder="search chats..."

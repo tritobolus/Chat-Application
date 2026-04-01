@@ -6,7 +6,7 @@ import axios from "axios";
 export const NewGroup = () => {
   const [groupName, setGroupName] = useState();
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const { users, userId, handleNewGroup, getGroups } = useCC();
+  const { users, userId, handleNewGroup, getGroups, loginUser } = useCC();
 
   const handleSelectUser = (userId) => {
     setSelectedUsers((prev) => {
@@ -19,6 +19,10 @@ export const NewGroup = () => {
   };
 
   const handleCreateGroup = async() => {
+    if(!groupName || selectedUsers.length <1){
+      alert("Group name & members are required!")
+      return
+    }
     try {
       const groupData = {
         groupName,
@@ -39,7 +43,7 @@ export const NewGroup = () => {
 
   return (
     <>
-      <div className="p-5 flex flex-col gap-y-2 w-76 h-120 bg-white rounded-xl">
+      <div className={`p-5 flex flex-col gap-y-2 w-76 h-120 shadow-md ${loginUser?.darkmode ? "bg-black shadow-white" : "bg-white shadow-black"} rounded-xl`}>
         <h1 className="text-center text-xl ">New Group</h1>
         <div className="flex flex-col">
           <label htmlFor="groupname" className="tet-sm text-gray-500">
@@ -50,14 +54,14 @@ export const NewGroup = () => {
             type="text"
             placeholder="Enter group name"
             onChange={(e) => setGroupName(e.target.value)}
-            className="px-2 py-2 bg-gray-100 rounded-xl border-2 border-gray-200"
+            className={`px-2 py-2 ${loginUser?.darkmode ? "bg-gray-900" : "bg-gray-100"} rounded-xl border-2 border-gray-200`}
           />
         </div>
         <div className="relative">
           <input
             type="text"
             placeholder="Search users"
-            className="px-2 py-2 pl-8 bg-gray-100 rounded-xl border-2 border-gray-200 w-full"
+            className={`px-2 py-2 pl-8 ${loginUser?.darkmode ? "bg-gray-900" : "bg-gray-100"} rounded-xl border-2 border-gray-200 w-full`}
           />
           <IoMdSearch
             size={20}
@@ -69,7 +73,7 @@ export const NewGroup = () => {
           {users.map((user) => (
             <div
               key={user._id}
-              className={`flex justify-between  items-center gap-x-4  hover:bg-gray-100 p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
+              className={`flex justify-between  items-center gap-x-4  ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}
             >
               <div className="relative flex justify-center items-center gap-x-2">
                 <img
@@ -96,7 +100,7 @@ export const NewGroup = () => {
         <div className="flex justify-between px-2">
           <button
             onClick={() => handleNewGroup()}
-            className="bg-gray-200 hover:cursor-pointer rounded-xl px-8 py-3"
+            className={`bg-gray-200 hover:cursor-pointer rounded-xl px-8 py-3 ${loginUser?.darkmode && "text-black"}`}
           >
             Cancel
           </button>

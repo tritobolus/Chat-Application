@@ -7,6 +7,7 @@ import { NewGroup } from "./NewGroup";
 import { useCC } from "../../context/Context";
 
 import axios from "axios";
+import { IoLogInOutline } from "react-icons/io5";
 
 export const DropDown = () => {
   const {
@@ -19,6 +20,7 @@ export const DropDown = () => {
     dropDown,
     newGroup,
     handleNewGroup,
+    loginUser
   } = useCC();
 
   const logout = async () => {
@@ -37,15 +39,15 @@ export const DropDown = () => {
 
   return (
     <>
-      <div className=" relative flex flex-col gap-y-2 w-35 bg-white p-2 rounded-lg text-sm">
+      <div className={` relative flex flex-col gap-y-2 w-35 shadow-md ${loginUser.darkmode ? "bg-black shadow-white text-white" : "bg-white shadow-black "} p-2 rounded-lg text-sm animation`}>
         <div
           onClick={() => handleNewGroup()}
-          className="flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded hover:bg-gray-100"
+          className={`flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded ${loginUser.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"}`}
         >
           <MdGroupAdd size={16} />
           <p>New group</p>
         </div>
-        <div className="flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded hover:bg-gray-100">
+        <div className={`flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded ${loginUser.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"}`}>
           <CgProfile size={16} />
           <p>Profile</p>
         </div>

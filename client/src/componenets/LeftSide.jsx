@@ -45,7 +45,7 @@ export const LeftSide = () => {
 
   return (
     <>
-      <div className=" relative flex flex-col gap-y-2 p-2 h-screen bg-white ">
+      <div className={` relative flex flex-col gap-y-2 p-2 h-screen ${loginUser?.darkmode ? "bg-black text-white" : "bg-white"} animation `}>
         {/* header */}
         <div className="flex flex-col gap-y-5 mx-4  pb-2 mb-2 ">
           {/* upper section */}
@@ -62,11 +62,11 @@ export const LeftSide = () => {
                 />
                 <div className="absolute top-8 right-0 flex items-center gap-2">
                   <span
-                    className={`h-3 w-3 rounded-full ${
+                    className={`h-3 w-3 rounded-full border-2 ${
                       onlineUsers.includes(userId)
-                        ? "bg-green-500 border-2 border-white"
-                        : "bg-gray-300 border-2 border-white"
-                    }`}
+                        ? "bg-green-500  "
+                        : loginUser?.darkmode ? "bg-gray-500" : "bg-gray-300"
+                    } ${loginUser?.darkmode ? "border-black" : "border-white"} animation`}
                   ></span>
                 </div>
               </div>

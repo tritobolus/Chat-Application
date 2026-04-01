@@ -26,6 +26,11 @@
    transform: rotate(30deg);
 }
 
+/* for dark mode animation */
+.animation {
+  @apply transition-all duration-500
+}
+
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */

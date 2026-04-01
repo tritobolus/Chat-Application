@@ -47,12 +47,12 @@ export const GroupProfile = ({ setProfile, user }) => {
         <CgProfile
           onClick={() => setTab("info")}
           size={25}
-          className={`${tab == "info" ? "text-purple-600" : "text-black"}`}
+          className={`${tab == "info" ? "text-purple-600" : loginUser.darkmode ? "text-white" : "text-black" } animation`}
         />
         <IoSettingsSharp
           onClick={() => setTab("settings")}
           size={25}
-          className={`${tab == "settings" ? "text-purple-600" : "text-black"}`}
+          className={`${tab == "settings" ? "text-purple-600" : loginUser.darkmode ? "text-white" : "text-black" } animation`}
         />
       </div>
     </div>
