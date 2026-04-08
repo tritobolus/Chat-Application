@@ -4,6 +4,7 @@ import { IoSend } from "react-icons/io5";
 import { ImAttachment } from "react-icons/im";
 import { BsEmojiSmile } from "react-icons/bs";
 import { MdOutlineClose } from "react-icons/md";
+import { FaMicrophone } from "react-icons/fa";
 
 import axios from "axios";
 
@@ -12,6 +13,7 @@ import { Profile } from "./UI/Profile";
 import { GroupProfile } from "./UI/GroupProfile";
 import { Emoji } from "./UI/Emoji_Picker/Emoji";
 import { Loading } from "./UI/Loading";
+import { RightSideTemp } from "./UI/RightSideTemp";
 
 export const Rightside = () => {
   const [user, setUser] = useState(null);
@@ -22,9 +24,19 @@ export const Rightside = () => {
   const [attachment, setAttachment] = useState(null);
 
   const [profile, setProfile] = useState(false);
-  
+
   const [isMediaLoding, setIsMediaLoading] = useState(false);
   const [isEmoji, setIsEmoji] = useState(false);
+
+  //for voice messages
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunks = useRef([]);
+  const timerRef = useRef(null);
+  const isCancelledRef = useRef(false);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   const chatRef = useRef(null);
 
@@ -39,14 +51,62 @@ export const Rightside = () => {
     username,
   } = useCC();
 
-    useEffect(() => {
-    setProfile(false)
-    setIsEmoji(false)
-  }, [currentRightWindow])
+  const startRecording = async () => {
+    setAudioURL(null);
+    isCancelledRef.current = false; // ✅ reset
+    setRecordingTime(0); // reset timer
 
-  // useEffect(() => {
-  //   console.log("Selected:", currentRightWindow, currentRightWindowType);
-  // }, [currentRightWindow, currentRightWindowType]);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunks.current.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      if (isCancelledRef.current) {
+        audioChunks.current = []; // ❌ discard audio
+        return; // ❌ DO NOT SEND
+      }
+      const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+      setAudioBlob(blob);
+      const url = URL.createObjectURL(blob);
+      setAudioURL(url);
+      audioChunks.current = [];
+      clearInterval(timerRef.current); // stop timer
+
+      await sendMessage(blob);
+    };
+
+    mediaRecorder.start();
+    setIsRecording(true);
+
+    // START TIMER
+    timerRef.current = setInterval(() => {
+      setRecordingTime((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopRecording = (cancel = false) => {
+    isCancelledRef.current = cancel; // ✅ correct
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+    clearInterval(timerRef.current);
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  useEffect(() => {
+    setProfile(false);
+    setIsEmoji(false);
+  }, [currentRightWindow]);
 
   const handleProfile = () => {
     if (profile) {
@@ -72,41 +132,60 @@ export const Rightside = () => {
   }, [currentRightWindow, users, groups, currentRightWindowType]);
 
   // send message
-  const sendMessage = async () => {
-    //if tere is any attachment then
+  const sendMessage = async (audioBlobParam = null) => {
     let imageUrl;
-    if (attachment) {
-      try {
-        setIsMediaLoading(true)
+    let audioUrl;
+
+    try {
+      setIsMediaLoading(true);
+
+      //Upload Image
+      if (attachment) {
         const imageData = new FormData();
         imageData.append("file", attachment);
         imageData.append("upload_preset", "MyImages");
         imageData.append("cloud_name", "dqxfpedkq");
 
-        const data = await axios.post(
+        const res = await axios.post(
           "https://api.cloudinary.com/v1_1/dqxfpedkq/image/upload",
           imageData,
         );
 
-        imageUrl = data.data.secure_url;
-
-      } catch (error) {
-        console.log(error);
+        imageUrl = res.data.secure_url;
       }
-    }
 
-    //send private messages
-    if (currentRightWindowType == "private") {
-      try {
-        let data;
-        let isMedia = false;
-        if(attachment){
-           data = imageUrl
-           isMedia = true;
-        } else {
-          data = message
-        }
+      // Upload Audio
+      if (audioBlobParam) {
+        const audioData = new FormData();
+        audioData.append("file", audioBlobParam);
+        audioData.append("upload_preset", "MyImages");
+        audioData.append("cloud_name", "dqxfpedkq");
 
+        const res = await axios.post(
+          "https://api.cloudinary.com/v1_1/dqxfpedkq/video/upload",
+          audioData,
+        );
+
+        audioUrl = res.data.secure_url;
+      }
+
+      // Prepare message
+      let data;
+      let isMedia = false;
+      let isAudio = false;
+
+      if (attachment) {
+        data = imageUrl;
+        isMedia = true;
+      } else if (audioBlobParam) {
+        data = audioUrl;
+        isAudio = true;
+      } else {
+        data = message;
+      }
+
+      // Send Private Message
+      if (currentRightWindowType === "private") {
         const res = await axios.post(
           "http://localhost:8000/message/sendPrivateMessage",
           {
@@ -114,29 +193,17 @@ export const Rightside = () => {
             receiverId: user._id,
             message: data,
             messageType: "privateMessage",
-            isMedia: isMedia
+            isMedia: isMedia,
+            isAudio: isAudio,
           },
         );
 
         socket.emit("sendMessage", res.data.responce);
-
         setMessages((prev) => [...prev, res.data.responce]);
-      } catch (error) {
-        console.log(error);
       }
 
-      //send group messages
-    } else if (currentRightWindowType == "group") {
-      try {
-        let data;
-        let isMedia = false;
-        if(attachment){
-           data = imageUrl
-           isMedia = true;
-        } else {
-          data = message
-        }
-
+      // Send Group Message
+      if (currentRightWindowType === "group") {
         const res = await axios.post(
           "http://localhost:8000/message/sendGroupMessage",
           {
@@ -144,18 +211,22 @@ export const Rightside = () => {
             groupId: currentRightWindow,
             message: data,
             messageType: "groupMessage",
-            isMedia: isMedia
+            isMedia: isMedia,
+            isAudio: isAudio,
           },
         );
-        socket.emit("sendMessage", res.data.responce);
 
-        // setMessages((prev) => [...prev, res.data.responce]);
-      } catch (error) {
-        console.log(error);
+        socket.emit("sendMessage", res.data.responce);
       }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsMediaLoading(false);
+      setAttachment(null);
+      setAudioBlob(null);
+      setAudioURL(null);
+      setMessage("");
     }
-    setIsMediaLoading(false)
-    setAttachment(false);
   };
 
   const getMessages = async () => {
@@ -382,13 +453,13 @@ export const Rightside = () => {
                           )}
 
                         {message.isMedia ? (
-                          <img
-                            src={message.message}
-                            className="h-40"
-                          />
+                          <img src={message.message} className="h-40" />
+                        ) : message.isAudio ? (
+                          <audio className="mb-3" controls src={message.message}></audio>
+
+                          
                         ) : (
                           <p>{message.message}</p>
-
                         )}
                         {/* message sender indicator */}
                         <div
@@ -438,7 +509,8 @@ export const Rightside = () => {
             <div
               className={` flex gap-x-4 justify-center items-center ${loginUser.darkmode ? "bg-black" : "bg-white"}  px-4 py-3 transition-all duration-500`}
             >
-              <label className="cursor-pointer">
+              {/* attachment */}
+              <label className={`${isRecording && "hidden"} cursor-pointer`}>
                 <ImAttachment size={20} className="text-gray-500" />
                 <input
                   type="file"
@@ -448,6 +520,7 @@ export const Rightside = () => {
                 />
               </label>
 
+              {/* input */}
               <div className="relative w-full">
                 {attachment ? (
                   <div className="flex gap-x-5 items-center px-2">
@@ -459,9 +532,24 @@ export const Rightside = () => {
                     <MdOutlineClose
                       className={`hover:cursor-pointer ${loginUser?.darkmode ? "text-white" : "text-black"} animation`}
                       size={25}
-                      onClick={() => {setAttachment(false), setAttachment(false)}}
+                      onClick={() => {
+                        (setAttachment(false), setAttachment(false));
+                      }}
                     />
-                    {isMediaLoding && <p className="text-red-500">wait image is sending...</p>}
+                    {isMediaLoding && (
+                      <p className="text-red-500">wait image is sending...</p>
+                    )}
+                  </div>
+                ) : isRecording ? (
+                  <div className="flex gap-x-5">
+                    <span className="animate-pulse">🔴</span>
+                    <p className={`${loginUser.darkmode && "text-white"}`}>{formatTime(recordingTime)}</p>
+                    <button
+                      className="text-red-500 hover:cursor-pointer "
+                      onClick={() => stopRecording(true)}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 ) : (
                   <input
@@ -477,27 +565,52 @@ export const Rightside = () => {
                   <BsEmojiSmile
                     onClick={() => setIsEmoji(!isEmoji)}
                     size={20}
-                    className={`absolute right-3 top-[11px]  hover:cursor-pointer ${isEmoji ? "text-purple-600 font-semibold" : "text-gray-500"}`}
+                    className={`${isRecording && "hidden"} absolute right-3 top-[11px]  hover:cursor-pointer ${isEmoji ? "text-purple-600 font-semibold" : "text-gray-500"}`}
                   />
                 )}
               </div>
 
-              <button // i want when my attachment is there then this button should not diable at all, also the UI how to do that ?
-                disabled={message.trim().length < 1 && !attachment}
-                onClick={() => {
-                  sendMessage();
-                  setMessage("");
-                  setIsEmoji(false)
-                }}
-                className={`  p-3 rounded-full bg-violet-700 ${message.trim().length < 1 && !attachment && "opacity-50 hover:cursor-not-allowed"} hover:cursor-pointer`}
-              >
-                <IoSend size={17} className="text-xl text-white" />
-              </button>
+              {/* conditionally manage the icons of send message and record voice */}
+              {message.trim().length < 1 && !attachment && !audioBlob ? (
+                <button
+                  className={`  p-3 rounded-full bg-violet-700  hover:cursor-pointer`}
+                >
+                  {isRecording ? (
+                    <IoSend
+                      size={17}
+                      className="text-xl text-white"
+                      onClick={() => stopRecording(false)}
+                    />
+                  ) : (
+                    <FaMicrophone
+                      size={17}
+                      onClick={() => {
+                        (setIsRecording(true), startRecording());
+                      }}
+                      className="text-xl text-white"
+                    />
+                  )}
+                </button>
+              ) : (
+                <button
+                  disabled={message.trim().length < 1 && !attachment}
+                  onClick={() => {
+                    sendMessage();
+                    setMessage("");
+                    setIsEmoji(false);
+                  }}
+                  className={`  p-3 rounded-full bg-violet-700 ${message.trim().length < 1 && !attachment && "opacity-50 hover:cursor-not-allowed"} hover:cursor-pointer`}
+                >
+                  <IoSend size={17} className="text-xl text-white" />
+                </button>
+              )}
             </div>
           </div>
         ) : (
-          <div>
-            <p>No one selected yet</p>
+          <div
+            className={`flex-1 flex justify-center items-center ${loginUser?.darkmode ? "bg-black text-white" : "bg-white text-black"} h-full`}
+          >
+            <RightSideTemp />
           </div>
         )}
 
@@ -513,7 +626,7 @@ export const Rightside = () => {
 
         {/* emoji picker */}
         <div className="absolute bottom-16 right-20">
-          {isEmoji && (<Emoji setMessage={setMessage} />)}
+          {isEmoji && <Emoji setMessage={setMessage} />}
         </div>
         {/* <div className="absolute top-10 right-10 w-10 h-10 backdrop-blur-3xl">
         {messageLoading && <Loading/> }

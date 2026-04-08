@@ -40,6 +40,7 @@ export const ContextProvider = ({ children }) => {
       setDropDown(false);
     } else {
       setDropDown(true);
+      setNewGroup(false)
     }
   };
   // http://localhost:8000

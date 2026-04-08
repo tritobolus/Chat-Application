@@ -4,13 +4,14 @@ const router = express.Router();
 
 router.post("/sendPrivateMessage", async (req, res) => {
   try {
-    const { senderId, receiverId, message, messageType, isMedia } = req.body;
+    const { senderId, receiverId, message, messageType, isMedia, isAudio } = req.body;
     const responce = await Message.create({
       senderId,
       receiverId,
       message,
       messageType,
-      isMedia
+      isMedia,
+      isAudio
     });
 
     return res.status(200).json({ message: "message sent", responce });
@@ -20,13 +21,14 @@ router.post("/sendPrivateMessage", async (req, res) => {
 });
 router.post("/sendGroupMessage", async (req, res) => {
   try {
-    const { senderId, groupId, message, messageType, isMedia } = req.body;
+    const { senderId, groupId, message, messageType, isMedia, isAudio } = req.body;
     const responce = await Message.create({
       senderId,
       groupId,
       message,
       messageType,
-      isMedia
+      isMedia,
+      isAudio
     });
 
     return res.status(200).json({ message: "message sent", responce });

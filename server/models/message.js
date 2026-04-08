@@ -16,11 +16,15 @@ const messageSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        messageType: {
+        messageType: {   //group message or private message
             type: String,
             required: true
         },
-        isMedia: {
+        isMedia: {      // is image or not ?
+            type: Boolean,
+            required:true
+        },
+        isAudio: {      // is voice message or not
             type: Boolean,
             required:true
         }
