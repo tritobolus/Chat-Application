@@ -7,9 +7,13 @@ const groupSchema = new mongoose.Schema(
       required: true,
     },
 
-    adminId: {
+    superAdminId: {
       type: String,
       required: true,
+    },
+
+    adminId: {
+      type: [String],
     },
 
     members: {

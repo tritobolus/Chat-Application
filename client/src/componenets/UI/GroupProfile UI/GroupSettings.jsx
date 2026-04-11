@@ -6,7 +6,7 @@ import { CiEdit } from "react-icons/ci";
 import { MdDone } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
-export const GroupSettings = ({ user }) => {
+export const GroupSettings = ({ group }) => {
   const { onlineUsers, userId, users, loginUser, getGroups } = useCC();
   const [isGroupName, setIsGroupName] = useState(false);
   const [isBio, setIsBio] = useState(false);
@@ -17,8 +17,8 @@ export const GroupSettings = ({ user }) => {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    setNewGroupName(user.groupName);
-    setNewBio(user.bio);
+    setNewGroupName(group.groupName);
+    setNewBio(group.bio);
   }, []);
 
   const handleGroupName = async () => {
@@ -26,7 +26,7 @@ export const GroupSettings = ({ user }) => {
       const res = await axios.patch(
         "http://localhost:8000/settings/changeGroupName",
         {
-          groupId: user._id,
+          groupId: group._id,
           newGroupName: newGroupName,
         },
       );
@@ -45,7 +45,7 @@ export const GroupSettings = ({ user }) => {
       const res = await axios.patch(
         "http://localhost:8000/settings/changeGroupBio",
         {
-          groupId: user._id,
+          groupId: group._id,
           newBio: newBio,
         },
       );
@@ -83,7 +83,7 @@ export const GroupSettings = ({ user }) => {
       //upload the image in custome avatar schema
       await axios.patch(`http://localhost:8000/settings/changeGroupProfileImage/`, {
         imageUrl,
-        groupId: user._id ,
+        groupId: group._id ,
       });
 
       getGroups();

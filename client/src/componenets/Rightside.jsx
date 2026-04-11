@@ -46,14 +46,43 @@ export const Rightside = () => {
     userId,
     onlineUsers,
     currentRightWindow,
+    setCurrentRightWindow,
     currentRightWindowType,
+    setCurrentRightWindowType,
     loginUser,
     username,
+    setGroups,
   } = useCC();
+
+  const linkifyText = (text, isMyMessage) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    return text.split(urlRegex).map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`underline break-all font-medium
+            ${
+              isMyMessage
+                ? "text-white hover:text-gray-200" // purple bg
+                : "text-blue-600 hover:text-blue-800" // white bg
+            }`}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
 
   const startRecording = async () => {
     setAudioURL(null);
-    isCancelledRef.current = false; // ✅ reset
+    isCancelledRef.current = false; // reset
     setRecordingTime(0); // reset timer
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -67,8 +96,8 @@ export const Rightside = () => {
 
     mediaRecorder.onstop = async () => {
       if (isCancelledRef.current) {
-        audioChunks.current = []; // ❌ discard audio
-        return; // ❌ DO NOT SEND
+        audioChunks.current = []; // discard audio
+        return; //  DO NOT SEND
       }
       const blob = new Blob(audioChunks.current, { type: "audio/webm" });
       setAudioBlob(blob);
@@ -124,15 +153,28 @@ export const Rightside = () => {
     }
 
     if (currentRightWindowType == "group") {
-      const selectedUser = groups.find(
+      const selectedGroup = groups.find(
         (group) => group._id == currentRightWindow,
       );
-      setUser(selectedUser);
+      setUser(selectedGroup);
     }
   }, [currentRightWindow, users, groups, currentRightWindowType]);
 
   // send message
   const sendMessage = async (audioBlobParam = null) => {
+    if (currentRightWindowType === "group") {
+      const currentGroup = groups.find((g) => g._id === currentRightWindow);
+
+      const isMember = currentGroup?.members
+        ?.map((id) => id.toString())
+        .includes(userId?.toString());
+
+      if (!isMember) {
+        alert("You are no longer in this group");
+        return;
+      }
+    }
+
     let imageUrl;
     let audioUrl;
 
@@ -300,8 +342,6 @@ export const Rightside = () => {
   // receive socket message
   useEffect(() => {
     socket.on("receiveMessage", (data) => {
-      // when its group Id then it is not showing aany data,, but when its receiverId itsshowing data why ?
-      console.log("from receivedMessage: ", data); //when i send message but it is group then its showing that it's messageType is private nessage.. why ?
       if (data.messageType === "privateMessage") {
         if (
           data.senderId === currentRightWindow &&
@@ -329,6 +369,65 @@ export const Rightside = () => {
 
     return () => socket.off("receiveMessage");
   }, [currentRightWindow]);
+
+  //remove group member
+  useEffect(() => {
+    socket.on("removedFromGroup", ({ groupId }) => {
+      console.log("Removed from group:", groupId);
+
+      // Remove group from list
+      setGroups((prev) => prev.filter((g) => g._id !== groupId));
+
+      // If user is currently inside that group
+      if (
+        currentRightWindowType === "group" &&
+        currentRightWindow === groupId
+      ) {
+        alert("You were removed from this group");
+
+        // 🔥 Clear UI
+        setCurrentRightWindow(null);
+        setCurrentRightWindowType(null);
+        setUser(null);
+        setMessages([]);
+      }
+    });
+
+    return () => socket.off("removedFromGroup");
+  }, [currentRightWindow, currentRightWindowType]);
+
+  // notify user who added to a group
+  useEffect(() => {
+    socket.on("addedToGroup", ({ group }) => {
+      console.log("Added to group:", group);
+
+      setGroups((prev) => {
+        const exists = prev.some((g) => g._id === group._id);
+        if (exists) return prev;
+
+        return [...prev, group];
+      });
+
+      // join socket room
+      socket.emit("joinGroup", group._id);
+    });
+
+    return () => socket.off("addedToGroup");
+  }, []);
+
+  //update all existing users when a new user removed or added
+  useEffect(() => {
+    socket.on("groupUpdated", (updatedGroup) => {
+      console.log("Group updated:", updatedGroup);
+
+      // Update group in state
+      setGroups((prev) =>
+        prev.map((g) => (g._id === updatedGroup._id ? updatedGroup : g)),
+      );
+    });
+
+    return () => socket.off("groupUpdated");
+  }, []);
 
   // auto scroll
   useEffect(() => {
@@ -375,11 +474,10 @@ export const Rightside = () => {
                     <div
                       className={`text-sm flex gap-x-1 ${loginUser.darkmode ? "text-gray-200" : "text-black"} animation`}
                     >
-                      {user?.members?.map((memberId) => {
+                      {user?.members?.map((memberId, index) => {
                         const member = users.find((u) => u._id === memberId);
                         return <p key={memberId}>{member?.username},</p>;
                       })}
-                      <p>{username}</p>
                     </div>
                   )}
                 </div>
@@ -455,11 +553,13 @@ export const Rightside = () => {
                         {message.isMedia ? (
                           <img src={message.message} className="h-40" />
                         ) : message.isAudio ? (
-                          <audio className="mb-3" controls src={message.message}></audio>
-
-                          
+                          <audio
+                            className="mb-3"
+                            controls
+                            src={message.message}
+                          ></audio>
                         ) : (
-                          <p>{message.message}</p>
+                          <p>{linkifyText(message.message, isMyMessage)}</p>
                         )}
                         {/* message sender indicator */}
                         <div
@@ -543,7 +643,9 @@ export const Rightside = () => {
                 ) : isRecording ? (
                   <div className="flex gap-x-5">
                     <span className="animate-pulse">🔴</span>
-                    <p className={`${loginUser.darkmode && "text-white"}`}>{formatTime(recordingTime)}</p>
+                    <p className={`${loginUser.darkmode && "text-white"}`}>
+                      {formatTime(recordingTime)}
+                    </p>
                     <button
                       className="text-red-500 hover:cursor-pointer "
                       onClick={() => stopRecording(true)}
@@ -620,7 +722,7 @@ export const Rightside = () => {
             <Profile setProfile={setProfile} user={user} />
           )}
           {profile && currentRightWindowType == "group" && (
-            <GroupProfile setProfile={setProfile} user={user} />
+            <GroupProfile setProfile={setProfile} group={user} />
           )}
         </div>
 

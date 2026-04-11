@@ -2,7 +2,7 @@ import React from "react";
 import { useCC } from "../../../context/Context";
 
 export const All = ({ tabData, tab }) => {
-  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser } = useCC();
+  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser, userId } = useCC();
   return (
     <>
       <div className="flex flex-col gap-y-1 h-112 overflow-y-auto hide-scrollbar flex-1 ">
@@ -11,7 +11,7 @@ export const All = ({ tabData, tab }) => {
             {tab === "active" ? "Everyone is Offline Now" : "No users found"}
           </p>
         ) : (
-          tabData.map((user) => (
+          tabData.filter((user) => user._id !== userId).map((user) => (
             <div
               onClick={() => {setCurrentRightWindow(user._id), setCurrentRightWindowType("private")}}
               key={user._id}

@@ -11,7 +11,7 @@ import { socket } from "../socket/socket";
 export const Layout = () => {
   const [loading, setLoading] = useState(false);
 
-  const { checkAuth, auth, getUsers, setOnlineUsers, onlineUsers, loginUser } = useCC();
+  const { checkAuth, auth, getUsers, setOnlineUsers, onlineUsers, loginUser, setCurrentRightWindow } = useCC();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,6 +44,8 @@ export const Layout = () => {
       setOnlineUsers(users);
     });
   }, []);
+
+ 
 
   return (
     <>

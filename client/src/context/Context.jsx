@@ -72,7 +72,7 @@ export const ContextProvider = ({ children }) => {
     try {
       const res = await axios.get("http://localhost:8000/user/getuser");
       // console.log(res);
-      setUseres(res.data.users.filter((user) => user._id !== userId));
+      setUseres(res.data.users);
       setLoginUser(res.data.users.find((u) => u._id == userId));
     } catch (error) {
       console.log(error);
@@ -122,6 +122,7 @@ export const ContextProvider = ({ children }) => {
         newGroup,
         loginUser,
         groups,
+        setGroups
       }}
     >
       {children}

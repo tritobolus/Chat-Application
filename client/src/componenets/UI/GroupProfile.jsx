@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useCC } from "../../context/Context";
 
 import { IoMdClose } from "react-icons/io";
-import { MdEmail } from "react-icons/md";
-import { MdBlock } from "react-icons/md";
 
 import { CgProfile } from "react-icons/cg";
 import { IoSettingsSharp } from "react-icons/io5";
@@ -11,9 +9,9 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { GroupInfo } from "./GroupProfile UI/GroupInfo";
 import { GroupSettings } from "./GroupProfile UI/GroupSettings";
 
-export const GroupProfile = ({ setProfile, user }) => {
-  const { onlineUsers, userId, users, loginUser } = useCC();
-  const admin = users.find((u) => u._id === user.adminId);
+export const GroupProfile = ({ setProfile, group }) => {
+  const { users, loginUser } = useCC();
+  const admin = users.find((u) => u._id === group.superAdminId);
 
   const [tab, setTab] = useState("info");
 
@@ -22,7 +20,9 @@ export const GroupProfile = ({ setProfile, user }) => {
       className={`flex flex-col gap-y-3 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 shadow-2xl p-4 py-6 transition-all duration-500`}
     >
       <div className="flex justify-between items-center">
-        <p className="font-bold text-lg">Group {tab == "info" ? "Info" : "Settings"}</p>
+        <p className="font-bold text-lg">
+          Group {tab == "info" ? "Info" : "Settings"}
+        </p>
 
         <IoMdClose onClick={() => setProfile(false)} size={20} />
       </div>
@@ -30,19 +30,26 @@ export const GroupProfile = ({ setProfile, user }) => {
       <div className="flex flex-col items-center gap-y-2">
         <div className=" flex flex-col leading-tight">
           <img
-            src={user.profileImage}
+            src={group.profileImage}
             alt=""
             className="h-35 w-35 object-cover rounded-full"
           />
         </div>
-        <p className="text-2xl font-semibold">{user.groupName}</p>
+        <div className="flex flex-col gap-y-1 justify-center items-center">
+          <p className="text-2xl font-semibold">{group.groupName}</p>
+          <p className="text-gray-500">
+            created_by:{" "}
+            {users.find((user) => user._id === group.superAdminId).username}
+          </p>
+        </div>
       </div>
 
       <div className="flex-1">
-        {tab == "info" && <GroupInfo user={user} />}
-        {tab == "settings" && <GroupSettings user={user} admin={admin} />}
+        {tab == "info" && <GroupInfo group={group} admin={admin} />}
+        {tab == "settings" && <GroupSettings group={group} admin={admin} />}
       </div>
-
+      {(group.adminId.includes(loginUser._id) || group.superAdminId === loginUser._id) && (
+        
       <div className="flex justify-between px-15">
         <CgProfile
           onClick={() => setTab("info")}
@@ -55,6 +62,7 @@ export const GroupProfile = ({ setProfile, user }) => {
           className={`${tab == "settings" ? "text-purple-600" : loginUser.darkmode ? "text-white" : "text-black" } animation`}
         />
       </div>
+      )}
     </div>
   );
 };

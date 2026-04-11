@@ -4,9 +4,9 @@ import { IoMdSearch } from "react-icons/io";
 import axios from "axios";
 
 export const NewGroup = () => {
+  const { users, userId, handleNewGroup, getGroups, loginUser } = useCC();
   const [groupName, setGroupName] = useState();
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const { users, userId, handleNewGroup, getGroups, loginUser } = useCC();
 
   const handleSelectUser = (userId) => {
     setSelectedUsers((prev) => {
@@ -26,7 +26,7 @@ export const NewGroup = () => {
     try {
       const groupData = {
         groupName,
-        adminId: userId,
+        superAdminId: userId,
         members: selectedUsers,
       };
       const res = await axios.post("http://localhost:8000/group/create", groupData);
@@ -70,7 +70,7 @@ export const NewGroup = () => {
         </div>
 
         <div className="flex flex-col  flex-1 overflow-y-auto">
-          {users.map((user) => (
+          {users.filter((user) => user._id !== userId).map((user) => (
             <div
               key={user._id}
               className={`flex justify-between  items-center gap-x-4  ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} p-1 rounded-xl hover:cursor-pointer transition-all duration-100 `}

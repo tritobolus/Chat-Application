@@ -2,7 +2,7 @@ import React from "react";
 import { useCC } from "../../../context/Context";
 
 export const Active = ({ tabData, tab }) => {
-  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser } = useCC();
+  const { setCurrentRightWindow,setCurrentRightWindowType, currentRightWindow, onlineUsers, loginUser, userId } = useCC();
   return (
     <>
       <div className="flex flex-col gap-y-1 overflow-y-auto hide-scrollbar flex-1">
@@ -11,7 +11,7 @@ export const Active = ({ tabData, tab }) => {
             {tab === "active" ? "Everyone is Offline Now" : "No users found"}
           </p>
         ) : (
-          tabData.map((user) => (
+          tabData.filter((user) => user._id !== userId).map((user) => (
             <div
               onClick={() => {setCurrentRightWindow(user._id), setCurrentRightWindowType("private")}}
               key={user._id}
@@ -19,7 +19,7 @@ export const Active = ({ tabData, tab }) => {
             >
               <div className="relative flex flex-col leading-tight">
                 <img
-                  src="https://cdn.hswstatic.com/gif/play/0b7f4e9b-f59c-4024-9f06-b3dc12850ab7-1920-1080.jpg"
+                  src={user.profileImage}
                   alt=""
                   className="h-12 w-12 object-cover rounded-full"
                 />

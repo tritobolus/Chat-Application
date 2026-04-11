@@ -13,6 +13,7 @@ import groupRoutes from "./routes/groupRoutes/groupRoute.js"
 import settings from "./routes/settingsRoute.js"
 
 import socketHandler from "./socket/socket.js";
+import { setIO } from "./socket/sokectInstance.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -32,6 +33,9 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+//pass to the to make a instace and use it every where
+setIO(io)
 
 // pass io to socket file
 socketHandler(io);
