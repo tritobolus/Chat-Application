@@ -11,19 +11,19 @@ export const MyProfile = ({ setProfile }) => {
 
   return (
     <>
-      <div className={`flex flex-col gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 shadow-2xl p-4 py-6 transition-all duration-500`}>
-        <div className="flex justify-between items-center">
+      <div className={`flex flex-col pt-18 gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 shadow-2xl p-4 py-6 transition-all duration-500`}>
+        {/* <div className="flex justify-between items-center">
           <p className="font-bold text-lg">My Info</p>
 
           <IoMdClose onClick={() => setProfile(false)} size={20} />
-        </div>
+        </div> */}
 
         <div className="flex flex-col items-center gap-y-2">
           <div className="relative flex flex-col leading-tight">
             <img
               src={loginUser.profileImage}
               alt=""
-              className="h-40 w-40 object-cover rounded-full"
+              className="h-40 w-40 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] "
             />
             <div className="absolute top-29 right-2 flex items-center gap-2">
               <span

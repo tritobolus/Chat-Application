@@ -4,6 +4,15 @@
 
 /* HTML: <div class="loader"></div> */
 /* HTML: <div class="loader"></div> */
+body {
+  font-family: "Crimson Pro", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  /* font-size: 20px; */
+}
+
+
 .loader {
   width: 30px;
   aspect-ratio: 1;

@@ -17,6 +17,7 @@ const socketHandler = (io) => {
 
     // sending message
     socket.on("sendMessage", (data) => {
+      // console.log("from socket.io sendmessage: ",data)
       const { receiverId, messageType, groupId } = data;
       if (messageType == "privateMessage") {
         io.to(receiverId).emit("receiveMessage", data);

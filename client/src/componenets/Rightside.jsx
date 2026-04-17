@@ -5,6 +5,7 @@ import { ImAttachment } from "react-icons/im";
 import { BsEmojiSmile } from "react-icons/bs";
 import { MdOutlineClose } from "react-icons/md";
 import { FaMicrophone } from "react-icons/fa";
+import { IoIosArrowBack } from "react-icons/io";
 
 import axios from "axios";
 
@@ -15,7 +16,7 @@ import { Emoji } from "./UI/Emoji_Picker/Emoji";
 import { Loading } from "./UI/Loading";
 import { RightSideTemp } from "./UI/RightSideTemp";
 
-export const Rightside = () => {
+export const Rightside = ({ setShowProfile, showProfile }) => {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -52,6 +53,9 @@ export const Rightside = () => {
     loginUser,
     username,
     setGroups,
+    setLastPrivateChats,
+    setLastGroupChats,
+    chatId,
   } = useCC();
 
   const linkifyText = (text, isMyMessage) => {
@@ -242,6 +246,46 @@ export const Rightside = () => {
 
         socket.emit("sendMessage", res.data.responce);
         setMessages((prev) => [...prev, res.data.responce]);
+
+        //updating last messages
+        setLastPrivateChats((prev) => {
+          const exists = prev.find(
+            (chat) => chat._id === res.data.responce.chatId,
+          );
+
+          if (exists) {
+            return prev.map((chat) =>
+              chat._id === res.data.responce.chatId
+                ? {
+                    ...chat,
+                    lastMessage: data,
+                    lastMessageSenderId: userId,
+                    isMedia,
+                    isGroup: false,
+                    isAudio,
+                    lastMessageTime: new Date(),
+                  }
+                : chat,
+            );
+          }
+          //it is importtant when user start the chat for the first time
+          return [
+            {
+              _id: res.data.responce.chatId,
+              members: [
+                res.data.responce.senderId,
+                res.data.responce.receiverId,
+              ],
+              lastMessage: res.data.responce.message,
+              lastMessageSenderId: res.data.responce.senderId,
+              isMedia,
+              isAudio,
+              isGroup: false,
+              lastMessageTime: new Date(),
+            },
+            ...prev,
+          ];
+        });
       }
 
       // Send Group Message
@@ -259,6 +303,44 @@ export const Rightside = () => {
         );
 
         socket.emit("sendMessage", res.data.responce);
+
+        //updating last messages
+        setLastGroupChats((prev) => {
+          const exists = prev.find(
+            (chat) => chat._id === res.data.updatedChat._id,
+          );
+
+          if (exists) {
+            return prev.map((chat) =>
+              chat._id === res.data.updatedChat._id
+                ? {
+                    ...chat,
+                    lastMessage: data,
+                    lastMessageSenderId:
+                      res.data.updatedChat.lastMessageSenderId,
+                    isMedia: res.data.updatedChat.isMedia,
+                    isAudio: res.data.updatedChat.isAudio,
+                    isGroup: true,
+                    lastMessageTime: res.data.updatedChat.lastMessageTime,
+                  }
+                : chat,
+            );
+          }
+          //it is importtant when user start the chat for the first time
+          return [
+            {
+              _id: res.data.updatedChat._id,
+              groupId: res.data.updatedChat.groupId,
+              lastMessage: res.data.responce.message,
+              lastMessageSenderId: res.data.updatedChat.lastMessageSenderId,
+              isMedia: res.data.updatedChat.isMedia,
+              isAudio: res.data.updatedChat.isAudio,
+              isGroup: true,
+              lastMessageTime: res.data.updatedChat.lastMessageTime,
+            },
+            ...prev,
+          ];
+        });
       }
     } catch (error) {
       console.log(error);
@@ -342,6 +424,7 @@ export const Rightside = () => {
   // receive socket message
   useEffect(() => {
     socket.on("receiveMessage", (data) => {
+      console.log(data);
       if (data.messageType === "privateMessage") {
         if (
           data.senderId === currentRightWindow &&
@@ -350,6 +433,40 @@ export const Rightside = () => {
           // only tokhon UI te show korbe
           setMessages((prev) => [...prev, data]);
         }
+
+        //updating last  messagwe state when a message received
+        setLastPrivateChats((prev) => {
+          const exists = prev.find((chat) => chat._id === data.chatId);
+
+          if (exists) {
+            return prev.map((chat) =>
+              chat._id === data.chatId
+                ? {
+                    ...chat,
+                    lastMessage: data.message,
+                    lastMessageSenderId: data.senderId,
+                    isMedia: data.isMedia,
+                    isAudio: data.isAudio,
+                    lastMessageTime: new Date(),
+                  }
+                : chat,
+            );
+          }
+
+          // if chat doesn't exist (first message case)
+          return [
+            {
+              _id: data.chatId,
+              members: [data.senderId, data.receiverId],
+              lastMessage: data.message,
+              lastMessageSenderId: data.senderId,
+              isMedia: data.isMedia,
+              isAudio: data.isAudio,
+              lastMessageTime: new Date(),
+            },
+            ...prev,
+          ];
+        });
       }
 
       if (data.messageType === "groupMessage") {
@@ -364,7 +481,76 @@ export const Rightside = () => {
         ) {
           setMessages((prev) => [...prev, data]);
         }
+
+        //updating last messages
+        setLastGroupChats((prev) => {
+          const exists = prev.find((chat) => chat._id === data.chatId);
+
+          if (exists) {
+            return prev.map((chat) =>
+              chat._id === data.chatId
+                ? {
+                    ...chat,
+                    lastMessage: data.message,
+                    lastMessageSenderId: data.senderId,
+                    isMedia: data.isMedia,
+                    isAudio: data.isAudio,
+                    isGroup: true,
+                    lastMessageTime: new Date(),
+                  }
+                : chat,
+            );
+          }
+          //it is importtant when user start the chat for the first time
+          return [
+            {
+              _id: data.chatId,
+              groupId: data.groupId,
+              lastMessage: data.message,
+              lastMessageSenderId: data.SenderId,
+              isMedia: data.isMedia,
+              isAudio: data.isAudio,
+              isGroup: true,
+              lastMessageTime: new Date(),
+            },
+            ...prev,
+          ];
+        });
       }
+
+      // //updating last  messagwe state when a message received
+      // setLastPrivateChats((prev) => {
+      //   const exists = prev.find((chat) => chat._id === data.chatId);
+
+      //   if (exists) {
+      //     return prev.map((chat) =>
+      //       chat._id === data.chatId
+      //         ? {
+      //             ...chat,
+      //             lastMessage: data.message,
+      //             lastMessageSenderId: data.senderId,
+      //             isMedia: data.isMedia,
+      //             isAudio: data.isAudio,
+      //             lastMessageTime: new Date(),
+      //           }
+      //         : chat,
+      //     );
+      //   }
+
+      //   // if chat doesn't exist (first message case)
+      //   return [
+      //     {
+      //       _id: data.chatId,
+      //       members: [data.senderId, data.receiverId],
+      //       lastMessage: data.message,
+      //       lastMessageSenderId: data.senderId,
+      //       isMedia: data.isMedia,
+      //       isAudio: data.isAudio,
+      //       lastMessageTime: new Date(),
+      //     },
+      //     ...prev,
+      //   ];
+      // });
     });
 
     return () => socket.off("receiveMessage");
@@ -445,14 +631,20 @@ export const Rightside = () => {
             <div
               className={`flex justify-between ${loginUser.darkmode ? "bg-black border-gray-900" : "bg-white border-gray-200"} border-b-2  shadow-xl p-2 transition-all duration-500`}
             >
+              <button
+                onClick={() => setCurrentRightWindow(null)}
+                className="md:hidden p-2 hover:bg-gray-100 rounded-full"
+              >
+                <IoIosArrowBack size={24} className="text-violet-700" />
+              </button>
               <div
-                onClick={() => handleProfile()}
+                onClick={() => setShowProfile(!showProfile)}
                 className="flex items-center gap-x-2 hover:cursor-pointer"
               >
                 <img
                   src={user?.profileImage}
                   alt=""
-                  className="h-12 w-12 object-cover rounded-full"
+                  className="h-12 w-12 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
                 />
                 <div className="flex flex-col leading-tight">
                   <p
@@ -463,13 +655,13 @@ export const Rightside = () => {
                       : user?.groupName}
                   </p>
                   {currentRightWindowType == "private" ? (
-                    <p className="text-sm">
+                    <div className="text-sm">
                       {onlineUsers.includes(user._id) ? (
                         <p className=" text-green-500">Online</p>
                       ) : (
                         <p className=" text-gray-500">Offline</p>
                       )}
-                    </p>
+                    </div>
                   ) : (
                     <div
                       className={`text-sm flex gap-x-1 ${loginUser.darkmode ? "text-gray-200" : "text-black"} animation`}
@@ -551,7 +743,10 @@ export const Rightside = () => {
                           )}
 
                         {message.isMedia ? (
-                          <img src={message.message} className="h-40" />
+                          <img
+                            src={message.message}
+                            className="h-40 rounded-xl "
+                          />
                         ) : message.isAudio ? (
                           <audio
                             className="mb-3"
@@ -559,7 +754,9 @@ export const Rightside = () => {
                             src={message.message}
                           ></audio>
                         ) : (
-                          <p>{linkifyText(message.message, isMyMessage)}</p>
+                          <p className="break-words">
+                            {linkifyText(message.message, isMyMessage)}
+                          </p>
                         )}
                         {/* message sender indicator */}
                         <div

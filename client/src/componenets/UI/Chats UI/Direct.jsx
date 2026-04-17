@@ -1,7 +1,7 @@
 import React from "react";
 import { useCC } from "../../../context/Context";
 
-export const All = ({ tabData, tab }) => {
+export const Direct = ({ tabData, tab }) => {
   const {
     setCurrentRightWindow,
     setCurrentRightWindowType,
@@ -120,7 +120,7 @@ export const All = ({ tabData, tab }) => {
                   <img
                     src={user.profileImage}
                     alt=""
-                    className="h-12 w-12 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
+                    className="h-11 w-11 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
                   />
 
                   <div className="absolute top-8 right-0 flex items-center gap-2">
@@ -138,17 +138,17 @@ export const All = ({ tabData, tab }) => {
 
                 <div className="flex flex-col w-full">
                   <div className="flex justify-between w-full">
-                    <p className="text-lg font-semibold">{user.username}</p>
+                    <p className="text-md font-semibold">{user.username}</p>
 
                     {time && (
-                      <p className="text-[12px] text-gray-400 whitespace-nowrap mt-1">
+                      <p className="text-[11px] text-gray-400 whitespace-nowrap mt-1">
                         {time}
                       </p>
                     )}
                   </div>
 
                   {/* Last Message */}
-                  <p className="text-md text-gray-500">
+                  <p className="text-sm text-gray-500">
                     {chat
                       ? chat.lastMessageSenderId === userId
                         ? "You: " + message

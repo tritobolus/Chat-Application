@@ -5,7 +5,7 @@ import { MdEmail } from "react-icons/md";
 import { MdBlock } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
-export const Profile = ({ setProfile, user }) => {
+export const Profile = ({ setShowProfile, user }) => {
   const { onlineUsers, userId, users, loginUser } = useCC();
 //   console.log("from profile",userId)
 
@@ -15,7 +15,7 @@ export const Profile = ({ setProfile, user }) => {
         <div className="flex justify-between items-center">
           <p className="font-bold text-lg">User Info</p>
 
-          <IoMdClose onClick={() => setProfile(false)} size={20} />
+          <IoMdClose className="hover:cursor-pointer" onClick={() => setShowProfile(false)} size={20} />
         </div>
 
         <div className="flex flex-col items-center gap-y-2">
@@ -23,7 +23,7 @@ export const Profile = ({ setProfile, user }) => {
             <img
               src={user.profileImage}
               alt=""
-              className="h-40 w-40 object-cover rounded-full"
+              className="h-40 w-40 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%]"
             />
             <div className="absolute top-29 right-2 flex items-center gap-2">
               <span

@@ -21,7 +21,7 @@ export const Active = ({ tabData, tab }) => {
                 <img
                   src={user.profileImage}
                   alt=""
-                  className="h-12 w-12 object-cover rounded-full"
+                  className="h-11 w-11 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
                 />
                 <div className="absolute top-8 right-0 flex items-center gap-2">
                   <span

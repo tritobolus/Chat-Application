@@ -49,7 +49,7 @@ export const Layout = () => {
 
   return (
     <>
-      <div className=" h-screen font-mono">
+      <div className=" h-screen ">
         <Body />
       </div>
     </>

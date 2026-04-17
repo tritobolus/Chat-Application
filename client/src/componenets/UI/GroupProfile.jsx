@@ -9,7 +9,7 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { GroupInfo } from "./GroupProfile UI/GroupInfo";
 import { GroupSettings } from "./GroupProfile UI/GroupSettings";
 
-export const GroupProfile = ({ setProfile, group }) => {
+export const GroupProfile = ({ setShowProfile, group }) => {
   const { users, loginUser } = useCC();
   const admin = users.find((u) => u._id === group.superAdminId);
 
@@ -24,7 +24,7 @@ export const GroupProfile = ({ setProfile, group }) => {
           Group {tab == "info" ? "Info" : "Settings"}
         </p>
 
-        <IoMdClose onClick={() => setProfile(false)} size={20} />
+        <IoMdClose className="hover:cursor-pointer" onClick={() => setShowProfile(false)} size={20} />
       </div>
 
       <div className="flex flex-col items-center gap-y-2">
@@ -32,7 +32,7 @@ export const GroupProfile = ({ setProfile, group }) => {
           <img
             src={group.profileImage}
             alt=""
-            className="h-35 w-35 object-cover rounded-full"
+            className="h-35 w-35 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] "
           />
         </div>
         <div className="flex flex-col gap-y-1 justify-center items-center">

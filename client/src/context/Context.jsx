@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { BACKEND_URL } from "../constants";
 
 export const Context = createContext();
 
@@ -11,6 +12,8 @@ export const ContextProvider = ({ children }) => {
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
 
+  const [chatId, setChatId] = useState("")
+
   // other details
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [currentRightWindow, setCurrentRightWindow] = useState("");
@@ -18,11 +21,34 @@ export const ContextProvider = ({ children }) => {
 
   const [users, setUseres] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [lastPrivateChats, setLastPrivateChats] = useState([]);
+  const [lastGroupChats, setLastGroupChats] = useState([]);
   const [loginUser, setLoginUser] = useState(null);
 
   //for dropdown
   const [newGroup, setNewGroup] = useState(false);
+  const [settings, setSettings] = useState(false);
   const [dropDown, setDropDown] = useState(false);
+
+  //get all messages when user login for the first time
+  const getLastChats = async () => {
+    try {
+      const res = await axios.get(BACKEND_URL + "/message/getLastChats", {
+        params: {
+          userId: userId,
+        },
+      });
+      console.log(res);
+      setLastPrivateChats(res.data.privateChats)
+      setLastGroupChats(res.data.groupChats)
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getLastChats();
+  }, [userId]);
 
   //for dropdown
   const handleNewGroup = () => {
@@ -34,13 +60,22 @@ export const ContextProvider = ({ children }) => {
       setNewGroup(true);
     }
   };
+  const handleSettings = () => {
+    if (settings) {
+      setSettings(false);
+      // setDropDown(false)
+    } else {
+      setDropDown(false);
+      setSettings(true);
+    }
+  };
 
   const handleDropdown = () => {
     if (dropDown) {
       setDropDown(false);
     } else {
       setDropDown(true);
-      setNewGroup(false)
+      setNewGroup(false);
     }
   };
   // http://localhost:8000
@@ -120,9 +155,18 @@ export const ContextProvider = ({ children }) => {
         dropDown,
         setNewGroup,
         newGroup,
+        handleSettings,
+        settings,
+        setSettings,
         loginUser,
         groups,
-        setGroups
+        setGroups,
+        lastPrivateChats,
+        setLastPrivateChats,
+        lastGroupChats,
+        setLastGroupChats,
+        chatId,
+        setChatId
       }}
     >
       {children}

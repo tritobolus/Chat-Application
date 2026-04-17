@@ -16,7 +16,7 @@ export const Users = () => {
     loginUser
   } = useCC();
   return (
-    <div className="flex flex-col gap-y-3">
+    <div className="flex flex-col gap-y-2">
       {/* middle section */}
       <div className={`relative rounded-xl ${loginUser?.darkmode ? "bg-gray-900 text-white" : "bg-gray-100"}  py-2`}>
         <input
@@ -31,7 +31,7 @@ export const Users = () => {
       </div>
 
       {/* lower section */}
-      <div className="flex gap-x-4 text-sm font-semibold text-gray-500 pb-1  border-b-2 border-gray-200">
+      <div className="flex gap-x-4 text-sm font-semibold text-gray-500 pb-1 ">
         <button className="hover:cursor-pointer  text-violet-700  border-violet-600">
           All
         </button>

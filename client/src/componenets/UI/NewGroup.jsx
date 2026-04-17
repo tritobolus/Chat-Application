@@ -43,7 +43,7 @@ export const NewGroup = () => {
 
   return (
     <>
-      <div className={`p-5 flex flex-col gap-y-2 w-76 h-120 shadow-md ${loginUser?.darkmode ? "bg-black shadow-white" : "bg-white shadow-black"} rounded-xl`}>
+      <div className={`p-5 flex flex-col gap-y-2 w-85 h-dvh  ${loginUser?.darkmode ? "bg-black shadow-white" : "bg-white shadow-black"} `}>
         <h1 className="text-center text-xl ">New Group</h1>
         <div className="flex flex-col">
           <label htmlFor="groupname" className="tet-sm text-gray-500">
