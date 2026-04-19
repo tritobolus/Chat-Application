@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useCC } from "../../../context/Context";
+import { SearchChats } from "../../../config/SearchChats";
 
 export const All = ({ tabData, tab }) => {
   const {
@@ -11,6 +12,7 @@ export const All = ({ tabData, tab }) => {
     userId,
     lastPrivateChats,
     setChatId,
+    query,
   } = useCC();
 
   // Create a fast lookup map for chats (optimization)
@@ -40,17 +42,29 @@ export const All = ({ tabData, tab }) => {
       return timeB - timeA; //  newest first
     });
 
+  // useEffect(() => {
+  //   if (query) {
+  //     console.log("from direct users",SearchChats(sortedUsers, query));
+  //   }
+  // }, [query]);
+
+  const filteredUsers = query
+  ? SearchChats(sortedUsers, query).map((r) => r.item)
+  : sortedUsers;
+
   return (
     <>
       <div className="flex flex-col">
-        {sortedUsers === 0 ? (
+        {filteredUsers.length === 0 ? (
           <p className="text-center text-gray-500 mt-20 mr-3">
-            {tab === "active" ? "Everyone is Offline Now" : "No users found"}
+             No users found
           </p>
         ) : (
-          sortedUsers.map((user) => {
+          filteredUsers.map((user) => {
             //Find chat for this user
-            const chat = lastPrivateChats.find((c) => c.members?.includes(user._id));
+            const chat = lastPrivateChats.find((c) =>
+              c.members?.includes(user._id),
+            );
 
             const message = !chat
               ? "No messages yet"
@@ -92,8 +106,7 @@ export const All = ({ tabData, tab }) => {
 
               return messageDate.toLocaleDateString("en-GB"); // fallback
             };
-            const time = formatDateLabel(chat)
-
+            const time = formatDateLabel(chat);
 
             // const time = chat?.lastMessageTime
             //   ? new Date(chat.lastMessageTime).toLocaleTimeString([], {

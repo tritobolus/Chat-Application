@@ -44,13 +44,13 @@ export const GroupProfile = ({ setShowProfile, group }) => {
         </div>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1  min-h-0 overflow-hidden  ">
         {tab == "info" && <GroupInfo group={group} admin={admin} />}
         {tab == "settings" && <GroupSettings group={group} admin={admin} />}
       </div>
       {(group.adminId.includes(loginUser._id) || group.superAdminId === loginUser._id) && (
         
-      <div className="flex justify-between px-15">
+      <div className="h-5 flex-shrink-0 z-10  flex justify-around items-center">
         <CgProfile
           onClick={() => setTab("info")}
           size={25}

@@ -30,6 +30,9 @@ export const ContextProvider = ({ children }) => {
   const [settings, setSettings] = useState(false);
   const [dropDown, setDropDown] = useState(false);
 
+  //search query
+  const [query, setQuery] = useState("");
+
   //get all messages when user login for the first time
   const getLastChats = async () => {
     try {
@@ -168,7 +171,9 @@ export const ContextProvider = ({ children }) => {
         lastGroupChats,
         setLastGroupChats,
         chatId,
-        setChatId
+        setChatId,
+        query,
+        setQuery
       }}
     >
       {children}

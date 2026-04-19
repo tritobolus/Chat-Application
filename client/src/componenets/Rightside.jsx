@@ -10,6 +10,8 @@ import { CgUnblock } from "react-icons/cg";
 
 import axios from "axios";
 
+import { BACKEND_URL } from "../constants";
+
 import { socket } from "../socket/socket";
 import { Profile } from "./UI/Profile";
 import { GroupProfile } from "./UI/GroupProfile";
@@ -58,6 +60,18 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
     setLastGroupChats,
     chatId,
   } = useCC();
+
+   const unBlockUser = async (blockId) => {
+    try {
+      const res = await axios.post(BACKEND_URL + "/user/unblockUser", {
+        unBlockById: loginUser?._id,
+        unBlockId: blockId,
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const linkifyText = (text, isMyMessage) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -810,7 +824,7 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
                   <p>You blocked</p>
                   <p className="font-semibold ">{user.username}</p>
                 </div>
-                <button className="flex gap-x-1 items-center px-2 py-1 bg-gray-300 rounded-2xl hover:cursor-pointer hover:scale-102">
+                <button onClick={() => unBlockUser(user._id)} className="flex gap-x-1 items-center px-2 py-1 bg-gray-300 rounded-2xl hover:cursor-pointer hover:scale-102">
                   <CgUnblock/>
                   <p>Unblock</p>
                 </button>

@@ -49,6 +49,7 @@ export const Chats = ({setMobileView}) => {
            
           </div>
         </div> */}
+        
 
         {/* chat navigation*/}
         <div className=" relative flex gap-x-4 text-sm font-semibold text-gray-500 pb-1  ">
@@ -82,6 +83,7 @@ export const Chats = ({setMobileView}) => {
         </div>
 
         <div className=" flex-1 min-h-0 overflow-y-auto hide-scrollbar  ">
+          
           {tab === "all" && <All tab={tab} tabData={tabData}  />}
           {/* {tab === "direct" && <Direct tab={tab} tabData={tabData} />} */}
           {/* {tab === "active" && <Active tab={tab} tabData={tabData} />} */}

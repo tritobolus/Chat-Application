@@ -11,7 +11,7 @@ export const MyProfile = ({ setProfile }) => {
 
   return (
     <>
-      <div className={`flex flex-col pt-18 gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 shadow-2xl p-4 py-6 transition-all duration-500`}>
+      <div className={`flex flex-col pt-18 gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 p-4 py-6 transition-all duration-500`}>
         {/* <div className="flex justify-between items-center">
           <p className="font-bold text-lg">My Info</p>
 

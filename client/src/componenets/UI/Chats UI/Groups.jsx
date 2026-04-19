@@ -1,6 +1,8 @@
 import React from "react";
 import { useCC } from "../../../context/Context";
 import { useEffect } from "react";
+import { SearchChats } from "../../../config/SearchChats";
+
 export const Groups = ({ tabData, tab }) => {
   const {
     setCurrentRightWindow,
@@ -10,8 +12,8 @@ export const Groups = ({ tabData, tab }) => {
     loginUser,
     lastGroupChats,
     users,
+    query
   } = useCC();
-  //   console.log(tabData)
 
   const userMap = {};
 
@@ -39,19 +41,20 @@ export const Groups = ({ tabData, tab }) => {
   return timeB - timeA; // 🔥 latest on top
 });
 
-  // useEffect(() => {
-  //   console.log("from last chats: ", lastGroupChats);
-  // }, [lastGroupChats]);
+
+   const filteredGroups = query
+    ? SearchChats(sortedGroups, query).map((r) => r.item)
+    : sortedGroups;
 
   return (
     <>
       <div className="flex flex-col ">
-        {tabData.length === 0 ? (
+        {filteredGroups.length === 0 ? (
           <p className="text-center text-gray-500 mt-20 mr-3">
-            You have no Groups yet
+            No groups found
           </p>
         ) : (
-          sortedGroups.map((group) => {
+          filteredGroups.map((group) => {
             const chat = lastGroupChats.find(
               (chat) => chat.groupId?.toString() === group._id?.toString(),
             );

@@ -13,7 +13,7 @@ export const GroupInfo = ({ group, admin }) => {
   const [member, setMember] = useState(null);
   return (
     <>
-      <div className="relative flex flex-col gap-y-3">
+      <div className="relative flex flex-col gap-y-3 flex-1 min-h-0 overflow-hidden ">
         {/* BIO */}
         <div className="flex flex-col gap-y-1">
           <p className="text-violet-700 text-md font-semibold">Description: </p>
@@ -53,6 +53,7 @@ export const GroupInfo = ({ group, admin }) => {
         </div> */}
 
         {/* members */}
+        <div className="flex flex-col gap-y-1 flex-1 min-h-0">
         <div className="flex flex-col gap-y-1">
           <div className="flex justify-between">
             <p className="text-violet-700 text-md font-semibold">Members: </p>
@@ -64,7 +65,9 @@ export const GroupInfo = ({ group, admin }) => {
               />
             )}
           </div>
-          <div className="flex flex-col gap-y-1 p-1">
+
+          
+          <div className="flex flex-col gap-y-1 p-1  overflow-y-auto  h-63 hide-scrollbar  ">  {/*  i want this div will scrollled if overflow....... */}
             {group.members?.map((member) => {
               const memberUser = users.find((u) => u._id === member);
 
@@ -109,6 +112,7 @@ export const GroupInfo = ({ group, admin }) => {
               );
             })}
           </div>
+        </div>
         </div>
         {isAddAdmin && (
           <div className="absolute top-0 right-0">

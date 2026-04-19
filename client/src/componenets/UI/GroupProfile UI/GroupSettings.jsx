@@ -196,12 +196,12 @@ export const GroupSettings = ({ group }) => {
                 <MdBlock size={20} className="text-red-500" />
                 <p className="text-red-500">Block User</p>
               </div> */}
-          <div
+          {/* <div
             className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}
           >
             <RiDeleteBin6Line size={20} className="text-red-500" />
             <p className="text-red-500">Delete Conversation</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </>
