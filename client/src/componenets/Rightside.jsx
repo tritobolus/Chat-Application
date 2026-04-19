@@ -6,6 +6,7 @@ import { BsEmojiSmile } from "react-icons/bs";
 import { MdOutlineClose } from "react-icons/md";
 import { FaMicrophone } from "react-icons/fa";
 import { IoIosArrowBack } from "react-icons/io";
+import { CgUnblock } from "react-icons/cg";
 
 import axios from "axios";
 
@@ -559,7 +560,7 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
   //remove group member
   useEffect(() => {
     socket.on("removedFromGroup", ({ groupId }) => {
-      console.log("Removed from group:", groupId);
+      // console.log("Removed from group:", groupId);
 
       // Remove group from list
       setGroups((prev) => prev.filter((g) => g._id !== groupId));
@@ -631,12 +632,12 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
             <div
               className={`flex justify-between ${loginUser.darkmode ? "bg-black border-gray-900" : "bg-white border-gray-200"} border-b-2  shadow-xl p-2 transition-all duration-500`}
             >
-              <button
+              {/* <button
                 onClick={() => setCurrentRightWindow(null)}
                 className="md:hidden p-2 hover:bg-gray-100 rounded-full"
               >
                 <IoIosArrowBack size={24} className="text-violet-700" />
-              </button>
+              </button> */}
               <div
                 onClick={() => setShowProfile(!showProfile)}
                 className="flex items-center gap-x-2 hover:cursor-pointer"
@@ -802,8 +803,28 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
               )}
             </div>
 
-            {/* MESSAGE INPUT */}
-            <div
+            {/* MESSAGE INPUT and chceking user blocked or not */}
+            {loginUser?.blocked?.includes(user._id) ? (
+              <div className="flex gap-x-5  justify-center items-center px-4 py-4">
+                <div className="flex gap-x-1">
+                  <p>You blocked</p>
+                  <p className="font-semibold ">{user.username}</p>
+                </div>
+                <button className="flex gap-x-1 items-center px-2 py-1 bg-gray-300 rounded-2xl hover:cursor-pointer hover:scale-102">
+                  <CgUnblock/>
+                  <p>Unblock</p>
+                </button>
+              </div>
+            ): loginUser?.blockedBy?.includes(user._id) ?(
+              <div className="flex gap-x-5  justify-center items-center px-4 py-5">
+                <div className="flex gap-x-1">
+                  <p className="font-semibold ">{user.username}</p>
+                  <p>blocked you</p>
+                </div>
+               
+              </div>
+            ) : (
+                <div
               className={` flex gap-x-4 justify-center items-center ${loginUser.darkmode ? "bg-black" : "bg-white"}  px-4 py-3 transition-all duration-500`}
             >
               {/* attachment */}
@@ -904,6 +925,9 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
                 </button>
               )}
             </div>
+            )}
+          
+
           </div>
         ) : (
           <div

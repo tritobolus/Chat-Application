@@ -19,7 +19,7 @@ export const ContextProvider = ({ children }) => {
   const [currentRightWindow, setCurrentRightWindow] = useState("");
   const [currentRightWindowType, setCurrentRightWindowType] = useState("");
 
-  const [users, setUseres] = useState([]);
+  const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [lastPrivateChats, setLastPrivateChats] = useState([]);
   const [lastGroupChats, setLastGroupChats] = useState([]);
@@ -107,7 +107,7 @@ export const ContextProvider = ({ children }) => {
     try {
       const res = await axios.get("http://localhost:8000/user/getuser");
       // console.log(res);
-      setUseres(res.data.users);
+      setUsers(res.data.users);
       setLoginUser(res.data.users.find((u) => u._id == userId));
     } catch (error) {
       console.log(error);
@@ -143,6 +143,7 @@ export const ContextProvider = ({ children }) => {
         getUsers,
         getGroups,
         users,
+        setUsers,
         setOnlineUsers,
         onlineUsers,
         setCurrentRightWindow,
@@ -159,6 +160,7 @@ export const ContextProvider = ({ children }) => {
         settings,
         setSettings,
         loginUser,
+        setLoginUser,
         groups,
         setGroups,
         lastPrivateChats,
