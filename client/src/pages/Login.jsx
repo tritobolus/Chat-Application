@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCC } from "../context/Context";
+import { BACKEND_URL } from "../constants";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,8 +14,8 @@ export const Login = () => {
     e.preventDefault();
     if (!email || !password) return alert("All fields are required.");
     try {
-      const res = await axios.post(
-        "http://localhost:8000/authentication/signin",
+      const res = await axios.post(BACKEND_URL +
+        "/authentication/signin",
         { email, password },
         { withCredentials: true }
       );

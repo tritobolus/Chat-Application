@@ -12,12 +12,6 @@ export const Body = () => {
   const [group, setGroup] = useState(null);
   const {currentRightWindowType, currentRightWindow, users, groups} = useCC();
 
-
-
-  // useEffect(() => {
-  //   setShowProfile(false)
-  // },[currentRightWindow, currentRightWindowType])
-
    useEffect(() => {
       if (currentRightWindowType == "private") {
         const selectedUser = users.find((user) => user._id == currentRightWindow);

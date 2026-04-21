@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useCC } from "../../../context/Context";
+import { SearchChats } from "../../../config/SearchChats";
 
 export const Direct = ({ tabData, tab }) => {
   const {
@@ -11,6 +12,7 @@ export const Direct = ({ tabData, tab }) => {
     userId,
     lastPrivateChats,
     setChatId,
+    query,
   } = useCC();
 
   // Create a fast lookup map for chats (optimization)
@@ -40,17 +42,21 @@ export const Direct = ({ tabData, tab }) => {
       return timeB - timeA; //  newest first
     });
 
+  const filteredUsers = query
+    ? SearchChats(sortedUsers, query).map((r) => r.item)
+    : sortedUsers;
+
   return (
     <>
       <div className="flex flex-col">
-        {sortedUsers === 0 ? (
-          <p className="text-center text-gray-500 mt-20 mr-3">
-            {tab === "active" ? "Everyone is Offline Now" : "No users found"}
-          </p>
+        {filteredUsers.length === 0 ? (
+          <p className="text-center text-gray-500 mt-20 mr-3">No users found</p>
         ) : (
-          sortedUsers.map((user) => {
+          filteredUsers.map((user) => {
             //Find chat for this user
-            const chat = lastPrivateChats.find((c) => c.members?.includes(user._id));
+            const chat = lastPrivateChats.find((c) =>
+              c.members?.includes(user._id),
+            );
 
             const message = !chat
               ? "No messages yet"
@@ -92,15 +98,7 @@ export const Direct = ({ tabData, tab }) => {
 
               return messageDate.toLocaleDateString("en-GB"); // fallback
             };
-            const time = formatDateLabel(chat)
-
-
-            // const time = chat?.lastMessageTime
-            //   ? new Date(chat.lastMessageTime).toLocaleTimeString([], {
-            //       hour: "2-digit",
-            //       minute: "2-digit",
-            //     })
-            //   : "";
+            const time = formatDateLabel(chat);
 
             return (
               <div
@@ -120,7 +118,7 @@ export const Direct = ({ tabData, tab }) => {
                   <img
                     src={user.profileImage}
                     alt=""
-                    className="h-11 w-11 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
+                    className="h-12 w-12 object-cover overflow-hidden rounded-[40%_60%_60%_40%/60%_40%_60%_40%] hover:scale-105 transition"
                   />
 
                   <div className="absolute top-8 right-0 flex items-center gap-2">
@@ -138,17 +136,17 @@ export const Direct = ({ tabData, tab }) => {
 
                 <div className="flex flex-col w-full">
                   <div className="flex justify-between w-full">
-                    <p className="text-md font-semibold">{user.username}</p>
+                    <p className="text-lg font-semibold">{user.username}</p>
 
                     {time && (
-                      <p className="text-[11px] text-gray-400 whitespace-nowrap mt-1">
+                      <p className="text-[12px] text-gray-400 whitespace-nowrap mt-1">
                         {time}
                       </p>
                     )}
                   </div>
 
                   {/* Last Message */}
-                  <p className="text-sm text-gray-500">
+                  <p className="text-md text-gray-500">
                     {chat
                       ? chat.lastMessageSenderId === userId
                         ? "You: " + message

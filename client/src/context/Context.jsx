@@ -12,7 +12,7 @@ export const ContextProvider = ({ children }) => {
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
 
-  const [chatId, setChatId] = useState("")
+  const [chatId, setChatId] = useState("");
 
   // other details
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -42,9 +42,8 @@ export const ContextProvider = ({ children }) => {
         },
       });
       console.log(res);
-      setLastPrivateChats(res.data.privateChats)
-      setLastGroupChats(res.data.groupChats)
-
+      setLastPrivateChats(res.data.privateChats);
+      setLastGroupChats(res.data.groupChats);
     } catch (error) {
       console.log(error);
     }
@@ -81,16 +80,12 @@ export const ContextProvider = ({ children }) => {
       setNewGroup(false);
     }
   };
-  // http://localhost:8000
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8000/authentication/verify`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.get(BACKEND_URL + `/authentication/verify`, {
+        withCredentials: true,
+      });
       if (res.data.message === "Success") {
         setAuth(true);
         setUserId(res.data.userId);
@@ -108,7 +103,7 @@ export const ContextProvider = ({ children }) => {
 
   const getUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/user/getuser");
+      const res = await axios.get(BACKEND_URL + "/user/getuser");
       // console.log(res);
       setUsers(res.data.users);
       setLoginUser(res.data.users.find((u) => u._id == userId));
@@ -124,7 +119,7 @@ export const ContextProvider = ({ children }) => {
 
   const getGroups = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/group/getGroups");
+      const res = await axios.get(BACKEND_URL + "/group/getGroups");
       // console.log(res.data.groupdata);
       setGroups(res.data.groupdata);
     } catch (error) {
@@ -173,7 +168,7 @@ export const ContextProvider = ({ children }) => {
         chatId,
         setChatId,
         query,
-        setQuery
+        setQuery,
       }}
     >
       {children}

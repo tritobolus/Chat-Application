@@ -9,6 +9,7 @@ import { useCC } from "../../context/Context";
 
 import axios from "axios";
 import { IoLogInOutline } from "react-icons/io5";
+import { BACKEND_URL } from "../../constants";
 
 export const DropDown = () => {
   const {
@@ -29,12 +30,9 @@ export const DropDown = () => {
 
   const logout = async () => {
     try {
-      const res = await axios.delete(
-        `http://localhost:8000/authentication/signout`,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.delete(BACKEND_URL + `/authentication/signout`, {
+        withCredentials: true,
+      });
       console.log(res);
       window.location.reload();
     } catch (error) {
@@ -56,12 +54,6 @@ export const DropDown = () => {
           <MdGroupAdd size={16} />
           <p>New group</p>
         </div>
-        {/* <div
-          className={`flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded ${loginUser.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"}`}
-        >
-          <CgProfile size={16} />
-          <p>Profile</p>
-        </div> */}
         <div
           onClick={() => handleSettings()}
           className={`flex gap-x-2 items-center justify-start hover:cursor-pointer p-1 rounded ${loginUser.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"}`}
@@ -76,8 +68,6 @@ export const DropDown = () => {
           <IoIosLogOut size={16} />
           <p>Log out</p>
         </div>
-
-        {/* <div className='absolute -top-2  rounded-tl-full right-3 w-3 h-3 bg-violet-700'></div> */}
       </div>
     </>
   );

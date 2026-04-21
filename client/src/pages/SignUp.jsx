@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_URL } from "../constants";
 
 export const SignUp = () => {
   const [username, setUsername] = useState("");
@@ -17,8 +18,8 @@ export const SignUp = () => {
   const getOTP = async (email) => {
     try {
       setOTPLoading(true);
-      const res = await axios.get(
-        "http://localhost:8000/authentication/verifyEmail",
+      const res = await axios.get(BACKEND_URL +
+        "/authentication/verifyEmail",
         { params: { email } }
       );
       setOTPLoading(false);

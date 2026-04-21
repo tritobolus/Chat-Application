@@ -965,9 +965,7 @@ export const Rightside = ({ setShowProfile, showProfile }) => {
         <div className="absolute bottom-16 right-20">
           {isEmoji && <Emoji setMessage={setMessage} />}
         </div>
-        {/* <div className="absolute top-10 right-10 w-10 h-10 backdrop-blur-3xl">
-        {messageLoading && <Loading/> }
-      </div> */}
+        
       </div>
     </>
   );

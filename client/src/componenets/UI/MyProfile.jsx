@@ -11,12 +11,7 @@ export const MyProfile = ({ setProfile }) => {
 
   return (
     <>
-      <div className={`flex flex-col pt-18 gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-85 p-4 py-6 transition-all duration-500`}>
-        {/* <div className="flex justify-between items-center">
-          <p className="font-bold text-lg">My Info</p>
-
-          <IoMdClose onClick={() => setProfile(false)} size={20} />
-        </div> */}
+      <div className={`flex flex-col pt-18 gap-y-8 rouned ${loginUser?.darkmode ? "text-white bg-black" : "text-black bg-white"} h-screen w-86 p-4 py-6 transition-all duration-500`}>
 
         <div className="flex flex-col items-center gap-y-2">
           <div className="relative flex flex-col leading-tight">
@@ -47,18 +42,6 @@ export const MyProfile = ({ setProfile }) => {
             <p>{loginUser.email}</p>
           </div>
         </div>
-
-        {/* others*/}
-        {/* <div className="flex flex-col gap-y-1">
-          <div className="flex gap-x-3 items-center rounded-md p-1 hover:bg-gray-100 hover:cursor-pointer">
-            <MdBlock size={20} className="text-red-500" />
-            <p className="text-red-500">Block User</p>
-          </div>
-          <div className="flex gap-x-3 items-center rounded-md p-1 hover:bg-gray-100 hover:cursor-pointer">
-            <RiDeleteBin6Line size={20} className="text-red-500" />
-            <p className="text-red-500">Delete Conversation</p>
-          </div>
-        </div> */}
       </div>
     </>
   );

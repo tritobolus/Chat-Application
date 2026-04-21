@@ -30,12 +30,12 @@ export const LeftSide = () => {
     setCurrentRightWindow,
     setCurrentRightWindowType,
     loginUser,
-    setQuery
+    setQuery,
   } = useCC();
 
   const [activeTab, setActiveTab] = useState("chats");
   const [profile, setProfile] = useState(false);
-  
+
   var [myBio, setMyBio] = useState("");
 
   useEffect(() => {
@@ -56,13 +56,14 @@ export const LeftSide = () => {
         className={` relative flex flex-col px-1  h-screen ${loginUser?.darkmode ? "bg-black text-white" : "bg-white"} animation `}
       >
         {/* header */}
-        <div className="flex flex-col gap-y-5 mx-5  my-2 mb-1 ">
+        <div className="flex flex-col gap-y-5 mx-5  my-2 mb-0 ">
+
           {/* upper section */}
           <div className="  flex justify-between items-center flex-shrink-0 mb-1">
             <div className="flex gap-x-3 justify-center  items-center">
               <div
                 onClick={() => setProfile(!profile)}
-                className="relative bg-gray-200 w-12 rounded-r-4xl rounded-l-2xl  flex flex-col leading-tight hover:cursor-pointer z-10"
+                className=" relative bg-gray-200 w-12 rounded-r-4xl rounded-l-2xl  flex flex-col leading-tight hover:cursor-pointer z-10"
               >
                 <img
                   src={loginUser?.profileImage}
@@ -81,15 +82,6 @@ export const LeftSide = () => {
                     className="absolute top-[10px] right-1 text-gray-600"
                   />
                 )}
-                {/* <div className="absolute top-8 right-0 flex items-center gap-2">
-                  <span
-                    className={`h-3 w-3 rounded-full border-2 ${
-                      onlineUsers.includes(userId)
-                        ? "bg-green-500  "
-                        : loginUser?.darkmode ? "bg-gray-500" : "bg-gray-300"
-                    } ${loginUser?.darkmode ? "border-black" : "border-white"} animation`}
-                  ></span>
-                </div> */}
               </div>
 
               {/* search chat */}
@@ -99,7 +91,7 @@ export const LeftSide = () => {
               >
                 <input
                   type="text"
-                  onChange={(e) => setQuery(e.target.value) }
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="search chats..."
                   className="pl-10 pr-4 focus:outline-none w-full"
                 />
@@ -119,23 +111,27 @@ export const LeftSide = () => {
           </div>
         </div>
 
-        <div className="flex w-85 flex-shrink-0 justify-center overflow-x-auto gap-x-2  mb-1 ">
-          {onlineUsers
-            ?.filter((user) => user !== userId) //remove yourself
-            .map((user) => {
-              const current = users?.find((u) => u._id === user);
+        {/* Chat section*/}
+        <div className=" flex flex-col flex-1 min-h-0   rounded-4xl  mb-2 bg-purple-100 mt-2 ">
+          <div
+            className={`${onlineUsers.length < 1 && "hidden"} flex w-85 flex-shrink-0 justify-center overflow-x-auto gap-x-2  `}
+          >
+            {onlineUsers
+              ?.filter((user) => user !== userId) //remove yourself
+              .map((user) => {
+                const current = users?.find((u) => u._id === user);
 
-              if (!current) return null;
+                if (!current) return null;
 
-              return (
-                <>
+                return (
                   <div
+                    key={user}
                     onClick={() => {
                       // setChatId(chat._id)
                       setCurrentRightWindow(current._id);
                       setCurrentRightWindowType("private");
                     }}
-                    className="relative "
+                    className="relative my-1 "
                   >
                     <img
                       key={user}
@@ -144,13 +140,9 @@ export const LeftSide = () => {
                     />
                     <div className="absolute bottom-1 border border-white -right-[1px] h-2 w-2 rounded-full bg-green-500"></div>
                   </div>
-                </>
-              );
-            })}
-        </div>
-
-        {/* lower portion navigation */}
-        <div className=" flex flex-col flex-1 min-h-0  pt-3 px-4  mb-2 rounded-4xl  border-1 border-gray-300">
+                );
+              })}
+          </div>
           {activeTab === "chats" && <Chats />}
           {/* {activeTab === "users" && <Users />} */}
           {/* {activeTab === "settings" && <Settings />} */}

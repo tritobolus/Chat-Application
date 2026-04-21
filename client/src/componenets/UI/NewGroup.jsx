@@ -5,6 +5,7 @@ import { IoMdSearch } from "react-icons/io";
 import { SearchChats } from "../../config/SearchChats";
 
 import axios from "axios";
+import { BACKEND_URL } from "../../constants";
 
 export const NewGroup = () => {
   const { users, userId, handleNewGroup, getGroups, loginUser } = useCC();
@@ -34,7 +35,7 @@ export const NewGroup = () => {
         superAdminId: userId,
         members: selectedUsers,
       };
-      const res = await axios.post("http://localhost:8000/group/create", groupData);
+      const res = await axios.post(BACKEND_URL + "/group/create", groupData);
 
 
       console.log(res)

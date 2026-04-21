@@ -1,5 +1,4 @@
 import React from "react";
-import { Navbar } from "../componenets/Navbar";
 import { Body } from "../componenets/body";
 
 import { useCC } from "../context/Context";

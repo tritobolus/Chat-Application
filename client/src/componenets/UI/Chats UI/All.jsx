@@ -1,8 +1,8 @@
-import React, {useEffect} from "react";
+import React from "react";
 import { useCC } from "../../../context/Context";
 import { SearchChats } from "../../../config/SearchChats";
 
-export const All = ({ tabData, tab }) => {
+export const All = ({ tabData }) => {
   const {
     setCurrentRightWindow,
     setCurrentRightWindowType,
@@ -11,22 +11,36 @@ export const All = ({ tabData, tab }) => {
     loginUser,
     userId,
     lastPrivateChats,
-    setChatId,
+    lastGroupChats,
+    users,
     query,
   } = useCC();
 
-  // Create a fast lookup map for chats (optimization)
+  // FIX: Combined chatMap (correct mapping)
   const chatMap = new Map();
 
+  // private
   lastPrivateChats?.forEach((chat) => {
     chat.members?.forEach((id) => {
-      chatMap.set(id, chat);
+      if (id !== userId) {
+        chatMap.set(id, chat);
+      }
     });
   });
 
-  // Sort users by latest message time
-  const sortedUsers = [...tabData]
-    .filter((user) => user._id !== userId)
+  // group (MAIN FIX)
+  lastGroupChats?.forEach((chat) => {
+    chatMap.set(chat.groupId, chat);
+  });
+
+  //keep only groups where user is a member
+  const filteredTabData = tabData.filter((item) => {
+    if (item.username) return true;
+    return item.members?.includes(userId);
+  });
+
+  const sortedUsers = [...filteredTabData]
+    .filter((item) => item._id !== userId)
     .sort((a, b) => {
       const chatA = chatMap.get(a._id);
       const chatB = chatMap.get(b._id);
@@ -39,32 +53,29 @@ export const All = ({ tabData, tab }) => {
         ? new Date(chatB.lastMessageTime).getTime()
         : 0;
 
-      return timeB - timeA; //  newest first
+      return timeB - timeA;
     });
 
-  // useEffect(() => {
-  //   if (query) {
-  //     console.log("from direct users",SearchChats(sortedUsers, query));
-  //   }
-  // }, [query]);
-
   const filteredUsers = query
-  ? SearchChats(sortedUsers, query).map((r) => r.item)
-  : sortedUsers;
+    ? SearchChats(sortedUsers, query).map((r) => r.item)
+    : sortedUsers;
 
   return (
     <>
       <div className="flex flex-col">
         {filteredUsers.length === 0 ? (
-          <p className="text-center text-gray-500 mt-20 mr-3">
-             No users found
-          </p>
+          <p className="text-center text-gray-500 mt-20 mr-3">No users found</p>
         ) : (
           filteredUsers.map((user) => {
-            //Find chat for this user
-            const chat = lastPrivateChats.find((c) =>
-              c.members?.includes(user._id),
-            );
+            const chat = chatMap.get(user._id);
+            const isGroup = !user.username;
+            const sender =
+              isGroup && chat
+                ? chat.lastMessageSenderId === userId
+                  ? "You"
+                  : users.find((u) => u._id === chat.lastMessageSenderId)
+                      ?.username || "Unknown"
+                : null;
 
             const message = !chat
               ? "No messages yet"
@@ -82,7 +93,6 @@ export const All = ({ tabData, tab }) => {
               const messageDate = new Date(chat.lastMessageTime);
               const today = new Date();
 
-              // Remove time part for accurate comparison
               const todayDate = new Date(
                 today.getFullYear(),
                 today.getMonth(),
@@ -94,40 +104,37 @@ export const All = ({ tabData, tab }) => {
                 messageDate.getDate(),
               );
 
-              const diffTime = todayDate - msgDate;
-              const diffDays = diffTime / (1000 * 60 * 60 * 24);
+              const diffDays = (todayDate - msgDate) / (1000 * 60 * 60 * 24);
 
               if (diffDays === 0)
                 return new Date(chat?.lastMessageTime).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 });
+
               if (diffDays === 1) return "Yesterday";
 
-              return messageDate.toLocaleDateString("en-GB"); // fallback
+              return messageDate.toLocaleDateString("en-GB");
             };
-            const time = formatDateLabel(chat);
 
-            // const time = chat?.lastMessageTime
-            //   ? new Date(chat.lastMessageTime).toLocaleTimeString([], {
-            //       hour: "2-digit",
-            //       minute: "2-digit",
-            //     })
-            //   : "";
+            const time = formatDateLabel(chat);
 
             return (
               <div
                 onClick={() => {
-                  // setChatId(chat._id)
                   setCurrentRightWindow(user._id);
-                  setCurrentRightWindowType("private");
+                  setCurrentRightWindowType(
+                    user.username ? "private" : "group",
+                  );
                 }}
                 key={user._id}
                 className={`flex items-center gap-x-3 ${
                   loginUser?.darkmode
                     ? "hover:bg-gray-900"
                     : "hover:bg-gray-100"
-                } ${currentRightWindow === user._id && "bg-purple-100"} p-1 rounded-xl hover:cursor-pointer transition-all duration-100`}
+                } ${
+                  currentRightWindow === user._id && "bg-purple-100"
+                } p-1 rounded-xl hover:cursor-pointer transition-all duration-100`}
               >
                 <div className="relative flex-shrink-0">
                   <img
@@ -144,14 +151,18 @@ export const All = ({ tabData, tab }) => {
                           : loginUser?.darkmode
                             ? "bg-gray-500"
                             : "bg-gray-300"
-                      } ${loginUser?.darkmode ? "border-black" : "border-white"}`}
+                      } ${
+                        loginUser?.darkmode ? "border-black" : "border-white"
+                      }`}
                     ></span>
                   </div>
                 </div>
 
                 <div className="flex flex-col w-full">
                   <div className="flex justify-between w-full">
-                    <p className="text-lg font-semibold">{user.username}</p>
+                    <p className="text-lg font-semibold">
+                      {user.username || user.groupName}
+                    </p>
 
                     {time && (
                       <p className="text-[12px] text-gray-400 whitespace-nowrap mt-1">
@@ -160,12 +171,13 @@ export const All = ({ tabData, tab }) => {
                     )}
                   </div>
 
-                  {/* Last Message */}
                   <p className="text-md text-gray-500">
                     {chat
-                      ? chat.lastMessageSenderId === userId
-                        ? "You: " + message
-                        : message
+                      ? isGroup
+                        ? `${sender}: ${message}`
+                        : chat.lastMessageSenderId === userId
+                          ? "You: " + message
+                          : message
                       : "No messages yet"}
                   </p>
                 </div>

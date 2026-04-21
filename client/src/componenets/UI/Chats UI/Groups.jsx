@@ -12,7 +12,7 @@ export const Groups = ({ tabData, tab }) => {
     loginUser,
     lastGroupChats,
     users,
-    query
+    query,
   } = useCC();
 
   const userMap = {};
@@ -22,27 +22,26 @@ export const Groups = ({ tabData, tab }) => {
   });
 
   const sortedGroups = [...tabData].sort((a, b) => {
-  const chatA = lastGroupChats.find(
-    (chat) => chat.groupId?.toString() === a._id?.toString()
-  );
+    const chatA = lastGroupChats.find(
+      (chat) => chat.groupId?.toString() === a._id?.toString(),
+    );
 
-  const chatB = lastGroupChats.find(
-    (chat) => chat.groupId?.toString() === b._id?.toString()
-  );
+    const chatB = lastGroupChats.find(
+      (chat) => chat.groupId?.toString() === b._id?.toString(),
+    );
 
-  const timeA = chatA?.lastMessageTime
-    ? new Date(chatA.lastMessageTime).getTime()
-    : 0;
+    const timeA = chatA?.lastMessageTime
+      ? new Date(chatA.lastMessageTime).getTime()
+      : 0;
 
-  const timeB = chatB?.lastMessageTime
-    ? new Date(chatB.lastMessageTime).getTime()
-    : 0;
+    const timeB = chatB?.lastMessageTime
+      ? new Date(chatB.lastMessageTime).getTime()
+      : 0;
 
-  return timeB - timeA; // 🔥 latest on top
-});
+    return timeB - timeA; //latest on top
+  });
 
-
-   const filteredGroups = query
+  const filteredGroups = query
     ? SearchChats(sortedGroups, query).map((r) => r.item)
     : sortedGroups;
 
@@ -73,8 +72,8 @@ export const Groups = ({ tabData, tab }) => {
                   : chat.lastMessage.length <= 15
                     ? chat.lastMessage
                     : chat.lastMessage.substring(0, 15) + "...";
-            
-             const formatDateLabel = (chat) => {
+
+            const formatDateLabel = (chat) => {
               if (!chat || !chat.lastMessageTime) return "";
 
               const messageDate = new Date(chat.lastMessageTime);
@@ -104,7 +103,7 @@ export const Groups = ({ tabData, tab }) => {
 
               return messageDate.toLocaleDateString("en-GB"); // fallback
             };
-            const time = formatDateLabel(chat)
+            const time = formatDateLabel(chat);
 
             return (
               <div

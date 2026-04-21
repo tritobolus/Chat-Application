@@ -5,6 +5,7 @@ import axios from "axios";
 import { CiEdit } from "react-icons/ci";
 import { MdDone } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { BACKEND_URL } from "../../../constants";
 
 export const GroupSettings = ({ group }) => {
   const { onlineUsers, userId, users, loginUser, getGroups } = useCC();
@@ -23,13 +24,10 @@ export const GroupSettings = ({ group }) => {
 
   const handleGroupName = async () => {
     try {
-      const res = await axios.patch(
-        "http://localhost:8000/settings/changeGroupName",
-        {
-          groupId: group._id,
-          newGroupName: newGroupName,
-        },
-      );
+      const res = await axios.patch(BACKEND_URL + "/settings/changeGroupName", {
+        groupId: group._id,
+        newGroupName: newGroupName,
+      });
 
       console.log(res);
       getGroups();
@@ -42,13 +40,10 @@ export const GroupSettings = ({ group }) => {
 
   const handleBio = async () => {
     try {
-      const res = await axios.patch(
-        "http://localhost:8000/settings/changeGroupBio",
-        {
-          groupId: group._id,
-          newBio: newBio,
-        },
-      );
+      const res = await axios.patch(BACKEND_URL + "/settings/changeGroupBio", {
+        groupId: group._id,
+        newBio: newBio,
+      });
 
       console.log(res);
       getGroups();
@@ -66,8 +61,6 @@ export const GroupSettings = ({ group }) => {
         return;
       }
 
-      // setIsUploading(true);
-
       const imageData = new FormData();
       imageData.append("file", image);
       imageData.append("upload_preset", "MyImages");
@@ -81,9 +74,9 @@ export const GroupSettings = ({ group }) => {
       const imageUrl = data.data.secure_url;
 
       //upload the image in custome avatar schema
-      await axios.patch(`http://localhost:8000/settings/changeGroupProfileImage/`, {
+      await axios.patch(BACKEND_URL + `/settings/changeGroupProfileImage/`, {
         imageUrl,
-        groupId: group._id ,
+        groupId: group._id,
       });
 
       getGroups();
@@ -92,13 +85,16 @@ export const GroupSettings = ({ group }) => {
       console.log(error);
     }
   };
+
   return (
     <>
       <div className="flex flex-col gap-y-3">
         {/* group details edit */}
         <div className="flex flex-col gap-y-3 ">
           <p className="text-lg font-bold">Edit group details</p>
-          <div className={`flex flex-col gap-y-2 p-2 rounded-2xl ${loginUser.darkmode ? "bg-black" : "bg-gray-100"} animation`}>
+          <div
+            className={`flex flex-col gap-y-2 p-2 rounded-2xl ${loginUser.darkmode ? "bg-black" : "bg-gray-100"} animation`}
+          >
             {/* username */}
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold">groupname: </p>
@@ -114,7 +110,7 @@ export const GroupSettings = ({ group }) => {
                   <MdDone
                     onClick={() => handleGroupName()}
                     size={25}
-                    className="text-purple-700     hover:cursor-pointer"
+                    className="text-purple-700 hover:cursor-pointer"
                   />
                 ) : (
                   <CiEdit
@@ -139,7 +135,7 @@ export const GroupSettings = ({ group }) => {
                   <MdDone
                     onClick={() => handleBio()}
                     size={25}
-                    className="text-purple-700     hover:cursor-pointer"
+                    className="text-purple-700 hover:cursor-pointer"
                   />
                 ) : (
                   <CiEdit
@@ -188,20 +184,6 @@ export const GroupSettings = ({ group }) => {
               </button>
             </div>
           )}
-        </div>
-
-        {/* others*/}
-        <div className="flex flex-col gap-y-1">
-          {/* <div className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}>
-                <MdBlock size={20} className="text-red-500" />
-                <p className="text-red-500">Block User</p>
-              </div> */}
-          {/* <div
-            className={`flex gap-x-3 items-center rounded-md p-1 ${loginUser?.darkmode ? "hover:bg-gray-900" : "hover:bg-gray-100"} hover:cursor-pointer`}
-          >
-            <RiDeleteBin6Line size={20} className="text-red-500" />
-            <p className="text-red-500">Delete Conversation</p>
-          </div> */}
         </div>
       </div>
     </>
