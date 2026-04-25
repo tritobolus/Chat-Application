@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { socket } from "../socket/socket";
 
+//this is the layout of this project....
 export const Layout = () => {
   const [loading, setLoading] = useState(false);
 
